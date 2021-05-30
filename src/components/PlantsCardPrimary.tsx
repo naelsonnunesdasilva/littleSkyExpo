@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
         margin: 10,
     },
     text: {
-        color: colors.green_dark,
+        color: colors.sky_blue_dark,
         fontFamily: fonts.heading,
         marginVertical: 16,
     },

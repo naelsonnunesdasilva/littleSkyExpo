@@ -15,86 +15,71 @@ import Button from '../components/Button';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export default function UserIdentification() {
-    const [isFocused, setIsFocused] = useState(false);
-    const [isFilled, setIsFilled] = useState(false);
-    const [name, setName] = useState<string>();
+export default function MainMenu() {
 
     const navigation = useNavigation();
 
-    function handledInputBlur() {
-        setIsFocused(false);
-        setIsFilled(!!name);
+    async function handleCrisisAlert() {
+        navigation.navigate('CrisisAlert');
     }
 
-    function handledInputFocus() {
-        setIsFocused(true);
+    async function handleTasks() {
+        navigation.navigate('Tasks');
     }
 
-    function handleInputChange(value: string) {
-        setIsFocused(!!value);
-        setName(value);
+    async function handleBreathingExercises() {
+        navigation.navigate('BreathingExercises');
     }
 
-    async function handleSubmit() {
-        if (!name) {
-            return Alert.alert('Me diz como chamar você 😢')
-        }
-
-        try {
-            await AsyncStorage.setItem('@plantmanager:user', name);
-            navigation.navigate('Confirmation', {
-                title: 'Prontinho',
-                subtitle: 'Agora vamos começar a cuidar das suas plantinhas',
-                buttonTitle: 'Começar',
-                icon: 'smile',
-                nextScreen: 'PlantSelect',
-            });
-        } catch (error) {
-            Alert.alert('Não foi possivel salvar seu nome')
-        }
-
+    async function handleDistract() {
+        navigation.navigate('Distract');
     }
 
     return (
         <SafeAreaView style={styles.container}>
-            <KeyboardAvoidingView
-                style={styles.container}
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            >
                 <View style={styles.content}>
                     <View style={styles.form}>
                         <View style={styles.header}>
                             <Text style={styles.emoji}>
-                                {isFilled ? '😄' : '😃'}
+                                😃
                             </Text>
 
                             <Text style={styles.title}>
-                                Como podemos{'\n'}
-                                chamar você?
+                                Escolha uma{'\n'}
+                                ação abaixo.
                             </Text>
                         </View>
 
-                        <TextInput
-                            style={[
-                                styles.input,
-                                (isFocused || isFilled) && { borderColor: colors.sky_blue }
-                            ]}
-                            placeholder='Digite seu nome'
-                            onBlur={handledInputBlur}
-                            onFocus={handledInputFocus}
-                            onChangeText={handleInputChange}
-                        />
+                        <View style={styles.footer}>
+                            <Button
+                                title='ALERTA DE CRISE'
+                                onPress={handleCrisisAlert}
+                            />
+                        </View>
 
                         <View style={styles.footer}>
                             <Button
-                                title='Confirmar'
-                                onPress={handleSubmit}
+                                title='TAREFAS'
+                                onPress={handleTasks}
+                            />
+                        </View>
+
+                        <View style={styles.footer}>
+                            <Button
+                                title='EXERCÍCIOS DE RESPIRAÇÃO'
+                                onPress={handleBreathingExercises}
+                            />
+                        </View>
+
+                        <View style={styles.footer}>
+                            <Button
+                                title='DISTRAIR'
+                                onPress={handleDistract}
                             />
                         </View>
                     </View>
                 </View>
-            </KeyboardAvoidingView>
+
         </SafeAreaView>
     )
 }

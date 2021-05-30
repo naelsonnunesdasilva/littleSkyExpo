@@ -14,7 +14,7 @@ import exerciciosDeRespiracaoImg from '../assets/exercicios-de-respiracao-que-re
 import fonts from '../styles/fonts';
 import { useNavigation } from '@react-navigation/native';
 
-export default function Welcome() {
+export default function CrisisAlert() {
 
     const navigation = useNavigation();
 

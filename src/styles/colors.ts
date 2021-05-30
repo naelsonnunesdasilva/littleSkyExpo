@@ -14,6 +14,9 @@ export default {
 
   blue: '#3D7199',
   blue_light: '#EBF6FF',
+  sky_blue: '#409fff',
+  sky_blue_dark: '#0066cc',
+  sky_blue_light: '#8dffff',
 
   red: '#E83F5B',
 };

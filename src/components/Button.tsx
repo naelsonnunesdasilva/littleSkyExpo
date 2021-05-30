@@ -21,7 +21,7 @@ export default function Button({ title, ...rest }: ButtonProps) {
 
 const styles = StyleSheet.create({
     constainer: {
-        backgroundColor: colors.green,
+        backgroundColor: colors.sky_blue,
         height: 54,
         borderRadius: 16,
         alignItems: 'center',

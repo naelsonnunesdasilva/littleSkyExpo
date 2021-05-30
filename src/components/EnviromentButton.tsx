@@ -45,15 +45,15 @@ const styles = StyleSheet.create({
         marginHorizontal: 5,
     },
     constainerActive: {
-        color: colors.green,
-        backgroundColor: colors.green_light,
+        color: colors.sky_blue,
+        backgroundColor: colors.sky_blue_light,
     },
     text: {
         color: colors.heading,
         fontFamily: fonts.text,
     },
     textActive:{
-        color: colors.green_dark,
+        color: colors.sky_blue_dark,
         fontFamily: fonts.heading,
     }
 })

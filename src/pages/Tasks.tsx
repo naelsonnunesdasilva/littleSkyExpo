@@ -14,7 +14,7 @@ import exerciciosDeRespiracaoImg from '../assets/exercicios-de-respiracao-que-re
 import fonts from '../styles/fonts';
 import { useNavigation } from '@react-navigation/native';
 
-export default function Welcome() {
+export default function Tasks() {
 
     const navigation = useNavigation();
 
@@ -25,29 +25,18 @@ export default function Welcome() {
     return (
         <SafeAreaView style={styles.constainer}>
             <View style={styles.wrapper} >
-                <Text style={styles.title}>
-                    Gerencie {'\n'}
-                    sua ansiedade {'\n'}
-                    de forma fácil
-                </Text>
+                <View style={styles.contentlistTaks}>
 
-                <Image
-                    source={exerciciosDeRespiracaoImg} style={styles.image}
-                    resizeMode={'contain'}
-                />
-
-                <Text style={styles.subtitle}>
-                    Sempre que precisar,{'\n'}
-                    nós cuidaremos de você!
-                </Text>
+                </View>
+                
 
                 <TouchableOpacity
                     style={styles.button}
                     activeOpacity={0.7}
                     onPress={handleStart}
                 >
-                    <Text>
-                        <Feather name="chevron-right" style={styles.buttonIcon} />
+                    <Text style={styles.buttonText}>
+                        NOVA LISTA
                     </Text>
                 </TouchableOpacity>
                 </View>
@@ -83,19 +72,20 @@ const styles = StyleSheet.create({
     },
     button: {
         backgroundColor: colors.sky_blue,
+        color: colors.white,
         justifyContent: 'center',
         alignItems: 'center',
         borderRadius: 16,
         marginTop: 10,
         marginBottom: 10,
         height: 56,
-        width: 56,
+        width: '80%',
     },
-    buttonIcon: {
+    buttonText: {
         fontSize: 32,
         color: colors.white,
     },
-    image: {
-        height: Dimensions.get('window').width *0.7,
+    contentlistTaks: {
+        height: '80%',
     }
 })
