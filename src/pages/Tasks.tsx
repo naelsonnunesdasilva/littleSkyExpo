@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Text,
     SafeAreaView,
@@ -6,7 +6,8 @@ import {
     TouchableOpacity,
     StyleSheet,
     View,
-    Alert
+    Alert,
+    FlatList,
 } from 'react-native';
 import colors from '../styles/colors';
 import { Feather } from '@expo/vector-icons';
@@ -17,9 +18,23 @@ import Button from '../components/Button';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Tasks() {
-    const [name, setName] = useState<string>();
-
     const navigation = useNavigation();
+
+    const [name, setName] = useState<string>();
+    const [listsOfTasks, setListsOfTasks] = useState<any[]>([]);
+    const [showModal, setShowModal] = useState<boolean>(false);
+
+    function fetchTasks() {
+        // To do - buscar listas de tarefas salvas em storage 
+        const testlistOfTasks: any[] = [];
+
+        setListsOfTasks(testlistOfTasks);
+    }
+
+    useEffect(() => {
+        fetchTasks();
+    }, []);
+
 
     function handleMenu() {
         navigation.navigate('MainMenu')
@@ -27,92 +42,89 @@ export default function Tasks() {
 
     async function handleNewTask() {
         if (!name) {
-            return Alert.alert('Me diz como chamar você 😢')
+            return Alert.alert('Adicione um nome a sua lista de tarefas.')
         }
 
         try {
-            await AsyncStorage.setItem('@littlesky:tasks', name);
-            navigation.navigate('Confirmation', {
-                title: 'Prontinho',
-                subtitle: 'Agora vamos começar a cuidar das suas plantinhas',
-                buttonTitle: 'Começar',
-                icon: 'smile',
-                nextScreen: 'PlantSelect',
+            const id:number = listsOfTasks.length ? Number(listsOfTasks[listsOfTasks.length - 1]['id']) + 1 : 1;
+            let newListOfTasks = listsOfTasks;
+            newListOfTasks?.push({
+                id,
+                name, 
             });
+
+            setListsOfTasks(newListOfTasks);
+            setShowModal(false);
+            //TO DO - Salvar as listas em storage 
+            // await AsyncStorage.setItem('@littlesky:listsOftasks', name);
+            // navigation.navigate('Confirmation', {
+            //     title: 'Prontinho',
+            //     subtitle: 'Agora vamos começar a cuidar das suas plantinhas',
+            //     buttonTitle: 'Começar',
+            //     icon: 'smile',
+            //     nextScreen: 'PlantSelect',
+            // });
         } catch (error) {
-            Alert.alert('Não foi possivel salvar seu nome')
+            Alert.alert('Não foi possivel salvar sua lista')
         }
     }
 
-    function handleRemove() {
-        //todo remover
+    function handleRemove(taskId: number) {
+        const newListOfTasks = listsOfTasks.filter(listOfTasks => listOfTasks.id != taskId);
+
+        setListsOfTasks(newListOfTasks);
     }
 
-    function handleInputChange(value: string){
+    function handleInputChange(value: string) {
         setName(value);
     }
 
     return (
         <SafeAreaView style={styles.constainer}>
-            <View style={styles.modal}>
+            {showModal && (<View style={styles.modal}>
                 <View style={styles.modalBg}></View>
                 <View style={styles.modalContainer}>
                     <View style={styles.modalBox}>
                         <Text style={styles.modalTxt}>Nome da Lista</Text>
                         <TextInput
-                                style={styles.modalInput}
-                                placeholder='Nova lista'
-                                onChangeText={handleInputChange}
-                            />
-                        <Button title='ADICIONAR' />
+                            style={styles.modalInput}
+                            placeholder='Nova lista'
+                            onChangeText={handleInputChange}
+                        />
+                        <Button
+                            title='ADICIONAR'
+                            onPress={handleNewTask}
+                        />
                     </View>
                 </View>
-            </View>
+            </View> )}
             <View style={styles.wrapper} >
                 <View style={styles.contentListTaks}>
-                    <View style={styles.itemListTasks} >
-                        <Text style={styles.textListTasks}>Lista 1</Text>
+                    <FlatList
+                        data={listsOfTasks}
+                        keyExtractor={(item) => item.id}
+                        renderItem={({ item }) => (
+                            <View style={styles.itemListTasks} >
+                        <Text style={styles.textListTasks}>{item.name}</Text>
                         <RectButton
                             style={styles.buttonRemove}
-                            onPress={handleRemove}
+                            onPress={() => handleRemove(item.id)}
                         >
                             <Feather name="trash" size={32} color={colors.red} />
                         </RectButton>
                     </View>
-                    <View style={styles.itemListTasks} >
-                        <Text style={styles.textListTasks}>Lista 2</Text>
-                        <RectButton
-                            style={styles.buttonRemove}
-                            onPress={handleRemove}
-                        >
-                            <Feather name="trash" size={32} color={colors.red} />
-                        </RectButton>
-                    </View>
-                    <View style={styles.itemListTasks} >
-                        <Text style={styles.textListTasks}>Lista 3</Text>
-                        <RectButton
-                            style={styles.buttonRemove}
-                            onPress={handleRemove}
-                        >
-                            <Feather name="trash" size={32} color={colors.red} />
-                        </RectButton>
-                    </View>
-                    <View style={styles.itemListTasks} >
-                        <Text style={styles.textListTasks}>Lista 4</Text>
-                        <RectButton
-                            style={styles.buttonRemove}
-                            onPress={handleRemove}
-                        >
-                            <Feather name="trash" size={32} color={colors.red} />
-                        </RectButton>
-                    </View>
+                        )}
+                        showsVerticalScrollIndicator={false}
+                        numColumns={1}
+                    />
+
                 </View>
 
 
                 <TouchableOpacity
                     style={styles.button}
                     activeOpacity={0.7}
-                    onPress={handleNewTask}
+                    onPress={() => setShowModal(true)}
                 >
                     <Text style={styles.buttonText}>
                         NOVA LISTA
@@ -206,7 +218,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
-    modalBox:{
+    modalBox: {
         width: '80%',
         backgroundColor: colors.white,
         padding: 20,
@@ -214,17 +226,17 @@ const styles = StyleSheet.create({
     modalTxt: {
         fontSize: 16,
     },
-    modalInput:{
+    modalInput: {
         borderBottomWidth: 1,
         borderColor: colors.gray,
         color: colors.heading,
         width: '100%',
         fontSize: 18,
-        marginTop: 5,padding: 10,
+        marginTop: 5, padding: 10,
         marginBottom: 15,
         paddingVertical: 10,
     },
-    modalBtn:{
+    modalBtn: {
 
     }
 })
