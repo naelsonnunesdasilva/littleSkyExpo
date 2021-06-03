@@ -17,27 +17,43 @@ import { useNavigation } from '@react-navigation/native';
 import Button from '../components/Button';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+export interface ListsOfTasksProps {
+    id: number;
+    name: string;
+    dateTimeNotification: Date | null,
+}
+
 export default function Tasks() {
     const navigation = useNavigation();
 
     const [name, setName] = useState<string>();
-    const [listsOfTasks, setListsOfTasks] = useState<any[]>([]);
+    const [listsOfTasks, setListsOfTasks] = useState<ListsOfTasksProps[]>([]);
     const [showModal, setShowModal] = useState<boolean>(false);
 
-    function fetchTasks() {
-        // To do - buscar listas de tarefas salvas em storage 
-        const testlistOfTasks: any[] = [];
+    async function fetchTasks() { 
+        const oldlistOfTasks: ListsOfTasksProps[] = await loadTasks();
 
-        setListsOfTasks(testlistOfTasks);
+        setListsOfTasks(oldlistOfTasks);
     }
 
     useEffect(() => {
         fetchTasks();
     }, []);
 
+    async function loadTasks(): Promise<ListsOfTasksProps[]>{
+        try {
+            const data = await AsyncStorage.getItem('@littlesky:listsOftasks');
+            return data ? (JSON.parse(data) as ListsOfTasksProps[]) : [];
 
-    function handleMenu() {
-        navigation.navigate('MainMenu')
+    
+        } catch (error) {
+            throw new Error(error);
+        }
+    }
+
+
+    function handleBack() {
+        navigation.goBack();
     }
 
     async function handleNewTask() {
@@ -50,29 +66,23 @@ export default function Tasks() {
             let newListOfTasks = listsOfTasks;
             newListOfTasks?.push({
                 id,
-                name, 
+                name,
+                dateTimeNotification: null,
             });
 
+            await AsyncStorage.setItem('@littlesky:listsOftasks',JSON.stringify(newListOfTasks));
             setListsOfTasks(newListOfTasks);
             setShowModal(false);
-            //TO DO - Salvar as listas em storage 
-            // await AsyncStorage.setItem('@littlesky:listsOftasks', name);
-            // navigation.navigate('Confirmation', {
-            //     title: 'Prontinho',
-            //     subtitle: 'Agora vamos começar a cuidar das suas plantinhas',
-            //     buttonTitle: 'Começar',
-            //     icon: 'smile',
-            //     nextScreen: 'PlantSelect',
-            // });
         } catch (error) {
             Alert.alert('Não foi possivel salvar sua lista')
         }
     }
 
-    function handleRemove(taskId: number) {
+    async function handleRemove(taskId: number) {
         const newListOfTasks = listsOfTasks.filter(listOfTasks => listOfTasks.id != taskId);
 
         setListsOfTasks(newListOfTasks);
+        await AsyncStorage.setItem('@littlesky:listsOftasks',JSON.stringify(newListOfTasks));
     }
 
     function handleInputChange(value: string) {
@@ -82,7 +92,11 @@ export default function Tasks() {
     return (
         <SafeAreaView style={styles.constainer}>
             {showModal && (<View style={styles.modal}>
-                <View style={styles.modalBg}></View>
+                <TouchableOpacity 
+                    style={styles.modalBg}
+                    onPress={() => setShowModal(false)}
+                    activeOpacity={0.8}
+                />
                 <View style={styles.modalContainer}>
                     <View style={styles.modalBox}>
                         <Text style={styles.modalTxt}>Nome da Lista</Text>
@@ -102,7 +116,7 @@ export default function Tasks() {
                 <View style={styles.contentListTaks}>
                     <FlatList
                         data={listsOfTasks}
-                        keyExtractor={(item) => item.id}
+                        keyExtractor={(item) => `${item.id}`}
                         renderItem={({ item }) => (
                             <View style={styles.itemListTasks} >
                         <Text style={styles.textListTasks}>{item.name}</Text>
@@ -120,16 +134,26 @@ export default function Tasks() {
 
                 </View>
 
-
-                <TouchableOpacity
-                    style={styles.button}
-                    activeOpacity={0.7}
-                    onPress={() => setShowModal(true)}
-                >
-                    <Text style={styles.buttonText}>
-                        NOVA LISTA
-                    </Text>
-                </TouchableOpacity>
+                <View style={styles.footerBtns}>
+                    <TouchableOpacity
+                        style={styles.buttonBack}
+                        activeOpacity={0.7}
+                        onPress={() => handleBack()}
+                    >
+                        <Text style={styles.buttonText}>
+                        <Feather name="chevron-left" style={styles.buttonIcon} />
+                        </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.buttonNewTask}
+                        activeOpacity={0.7}
+                        onPress={() => setShowModal(true)}
+                    >
+                        <Text style={styles.buttonText}>
+                            NOVA LISTA
+                        </Text>
+                    </TouchableOpacity>
+                </View>
             </View>
         </SafeAreaView>
     )
@@ -162,7 +186,28 @@ const styles = StyleSheet.create({
         color: colors.heading,
         fontFamily: fonts.text,
     },
-    button: {
+    footerBtns:{
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
+    buttonBack: {
+        backgroundColor: colors.sky_blue,
+        color: colors.white,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 16,
+        marginTop: 10,
+        marginBottom: 10,
+        height: 56,
+        width: '18%',
+    },
+    buttonIcon: {
+        fontSize: 32,
+        color: colors.white,
+    },
+    buttonNewTask: {
         backgroundColor: colors.sky_blue,
         color: colors.white,
         justifyContent: 'center',
@@ -207,7 +252,6 @@ const styles = StyleSheet.create({
     modalBg: {
         position: 'absolute',
         backgroundColor: colors.backgroundBg,
-        opacity: 0.8,
         width: '100%',
         height: '100%',
     },
@@ -238,5 +282,5 @@ const styles = StyleSheet.create({
     },
     modalBtn: {
 
-    }
+    },
 })
