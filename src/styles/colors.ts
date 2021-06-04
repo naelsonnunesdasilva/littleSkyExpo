@@ -3,7 +3,7 @@ export default {
   green_dark: '#2B7A4B',
   green_light: '#DAF2E4',
 
-  heading: '#52665A',
+  heading: '#333',
   body_dark: '#738078',
   body_light: '#AAB2AD',
 

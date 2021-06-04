@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import colors from '../styles/colors';
 import { Feather } from '@expo/vector-icons';
-import { RectButton, RectButtonProps, TouchableHighlight } from 'react-native-gesture-handler';
+import { RectButton, TouchableHighlight } from 'react-native-gesture-handler';
 import fonts from '../styles/fonts';
 import { useNavigation } from '@react-navigation/native';
 import Button from '../components/Button';
@@ -201,6 +201,7 @@ const styles = StyleSheet.create({
         width: '100%',
         padding: 20,
         height: '80%',
+        marginTop: 5,
     },
     itemListTasks: {
         display: 'flex',
@@ -219,6 +220,9 @@ const styles = StyleSheet.create({
         fontSize: 16,
         alignContent: 'flex-start',
         paddingTop: 20,
+        color: colors.heading,
+        fontFamily: fonts.text,
+        letterSpacing: 1,
     },
     buttonRemove: {
         paddingTop: 15,

@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import colors from '../styles/colors';
 import { Feather } from '@expo/vector-icons';
-import { RectButton, RectButtonProps } from 'react-native-gesture-handler';
+import { RectButton, TouchableHighlight } from 'react-native-gesture-handler';
 import fonts from '../styles/fonts';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import Button from '../components/Button';
@@ -34,7 +34,7 @@ export default function Tasks() {
     const route = useRoute();
     const { listId } = route.params as TasksProps;
 
-    async function fetchTasks() { 
+    async function fetchTasks() {
         const oldTasks: TasksProps[] = await loadTasks();
 
         setTasks(oldTasks);
@@ -44,12 +44,12 @@ export default function Tasks() {
         fetchTasks();
     }, []);
 
-    async function loadTasks(): Promise<TasksProps[]>{
+    async function loadTasks(): Promise<TasksProps[]> {
         try {
             const data = await AsyncStorage.getItem(`@littlesky:tasks-${listId}`);
             return data ? (JSON.parse(data) as TasksProps[]) : [];
 
-    
+
         } catch (error) {
             throw new Error(error);
         }
@@ -66,7 +66,7 @@ export default function Tasks() {
         }
 
         try {
-            const id:number = tasks.length ? Number(tasks[tasks.length - 1]['id']) + 1 : 1;
+            const id: number = tasks.length ? Number(tasks[tasks.length - 1]['id']) + 1 : 1;
             let newTasks = tasks;
             newTasks?.push({
                 id,
@@ -74,7 +74,7 @@ export default function Tasks() {
                 listId,
             });
 
-            await AsyncStorage.setItem(`@littlesky:tasks-${listId}`,JSON.stringify(newTasks));
+            await AsyncStorage.setItem(`@littlesky:tasks-${listId}`, JSON.stringify(newTasks));
             setTasks(newTasks);
             setShowModal(false);
         } catch (error) {
@@ -86,17 +86,21 @@ export default function Tasks() {
         const newTasks = tasks.filter(tasks => tasks.id != taskId);
 
         setTasks(newTasks);
-        await AsyncStorage.setItem(`@littlesky:tasks-${listId}`,JSON.stringify(newTasks));
+        await AsyncStorage.setItem(`@littlesky:tasks-${listId}`, JSON.stringify(newTasks));
     }
 
     function handleInputChange(value: string) {
         setName(value);
     }
 
+    function editTasks(id: number, name: string){
+
+    }
+
     return (
         <SafeAreaView style={styles.constainer}>
             {showModal && (<View style={styles.modal}>
-                <TouchableOpacity 
+                <TouchableOpacity
                     style={styles.modalBg}
                     onPress={() => setShowModal(false)}
                     activeOpacity={0.8}
@@ -115,7 +119,7 @@ export default function Tasks() {
                         />
                     </View>
                 </View>
-            </View> )}
+            </View>)}
             <View style={styles.wrapper} >
                 <View style={styles.contentListTaks}>
                     <FlatList
@@ -123,14 +127,28 @@ export default function Tasks() {
                         keyExtractor={(item) => `${item.id}`}
                         renderItem={({ item }) => (
                             <View style={styles.itemListTasks} >
-                        <Text style={styles.textListTasks}>{item.name}</Text>
-                        <RectButton
-                            style={styles.buttonRemove}
-                            onPress={() => handleRemove(item.id)}
-                        >
-                            <Feather name="trash" size={32} color={colors.red} />
-                        </RectButton>
-                    </View>
+                                <TouchableHighlight
+                                    style={styles.btnTask}
+                                    onPress={() => editTasks(item.id, item.name)}
+                                    underlayColor='#ddd'
+                                >
+                                    <Text style={styles.textListTasks}>- {item.name}</Text>
+                                </TouchableHighlight>
+                                <View>
+                                    <RectButton
+                                        style={styles.buttonRemove}
+                                        onPress={() => handleRemove(item.id)}
+                                    >
+                                        <Feather name="trash" size={32} color={colors.red} />
+                                    </RectButton>
+                                    <RectButton
+                                        style={styles.buttonRemove}
+                                        onPress={() => handleRemove(item.id)}
+                                    >
+                                        <Feather name="trash" size={32} color={colors.red} />
+                                    </RectButton>
+                                </View>
+                            </View>
                         )}
                         showsVerticalScrollIndicator={false}
                         numColumns={1}
@@ -145,7 +163,7 @@ export default function Tasks() {
                         onPress={() => handleBack()}
                     >
                         <Text style={styles.buttonText}>
-                        <Feather name="chevron-left" style={styles.buttonIcon} />
+                            <Feather name="chevron-left" style={styles.buttonIcon} />
                         </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
@@ -190,7 +208,7 @@ const styles = StyleSheet.create({
         color: colors.heading,
         fontFamily: fonts.text,
     },
-    footerBtns:{
+    footerBtns: {
         width: '100%',
         display: 'flex',
         flexDirection: 'row',
@@ -230,6 +248,7 @@ const styles = StyleSheet.create({
         width: '100%',
         padding: 20,
         height: '80%',
+        marginTop: 5,
     },
     itemListTasks: {
         display: 'flex',
@@ -237,12 +256,21 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         borderBottomColor: colors.sky_blue,
         borderBottomWidth: 2,
-        paddingVertical: 20,
+        paddingVertical: 5,
+    },
+    btnTask:{
+        width: 280,
+        display: 'flex',
+        paddingBottom: 10,
+        backgroundColor: '#ccc',
     },
     textListTasks: {
         fontSize: 16,
         alignContent: 'flex-start',
         paddingTop: 5,
+        color: colors.heading,
+        fontFamily: fonts.text,
+        letterSpacing: 0.7,
     },
     buttonRemove: {
         alignContent: 'flex-end',
