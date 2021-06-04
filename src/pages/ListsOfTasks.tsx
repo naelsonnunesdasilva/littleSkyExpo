@@ -8,53 +8,48 @@ import {
     View,
     Alert,
     FlatList,
-    CheckBox,
 } from 'react-native';
 import colors from '../styles/colors';
 import { Feather } from '@expo/vector-icons';
-import { RectButton, RectButtonProps } from 'react-native-gesture-handler';
+import { RectButton, RectButtonProps, TouchableHighlight } from 'react-native-gesture-handler';
 import fonts from '../styles/fonts';
-import { useRoute, useNavigation } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import Button from '../components/Button';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export interface TasksProps {
-    listId: number;
+export interface ListsOfTasksProps {
     id: number;
     name: string;
+    dateTimeNotification: Date | null,
 }
 
-export default function Tasks() {
+export default function ListsOfTasks() {
     const navigation = useNavigation();
 
     const [name, setName] = useState<string>();
-    const [tasks, setTasks] = useState<TasksProps[]>([]);
+    const [listsOfTasks, setListsOfTasks] = useState<ListsOfTasksProps[]>([]);
     const [showModal, setShowModal] = useState<boolean>(false);
 
-    const route = useRoute();
-    const { listId } = route.params as TasksProps;
+    async function fetchTasks() {
+        const oldlistOfTasks: ListsOfTasksProps[] = await loadTasks();
 
-    async function fetchTasks() { 
-        const oldTasks: TasksProps[] = await loadTasks();
-
-        setTasks(oldTasks);
+        setListsOfTasks(oldlistOfTasks);
     }
 
     useEffect(() => {
         fetchTasks();
     }, []);
 
-    async function loadTasks(): Promise<TasksProps[]>{
+    async function loadTasks(): Promise<ListsOfTasksProps[]> {
         try {
-            const data = await AsyncStorage.getItem(`@littlesky:tasks-${listId}`);
-            return data ? (JSON.parse(data) as TasksProps[]) : [];
+            const data = await AsyncStorage.getItem('@littlesky:listsOftasks');
+            return data ? (JSON.parse(data) as ListsOfTasksProps[]) : [];
 
-    
+
         } catch (error) {
             throw new Error(error);
         }
     }
-
 
     function handleBack() {
         navigation.goBack();
@@ -66,47 +61,52 @@ export default function Tasks() {
         }
 
         try {
-            const id:number = tasks.length ? Number(tasks[tasks.length - 1]['id']) + 1 : 1;
-            let newTasks = tasks;
-            newTasks?.push({
+            const id: number = listsOfTasks.length ? Number(listsOfTasks[listsOfTasks.length - 1]['id']) + 1 : 1;
+            let newListOfTasks = listsOfTasks;
+            newListOfTasks?.push({
                 id,
                 name,
-                listId,
+                dateTimeNotification: null,
             });
 
-            await AsyncStorage.setItem(`@littlesky:tasks-${listId}`,JSON.stringify(newTasks));
-            setTasks(newTasks);
+            await AsyncStorage.setItem('@littlesky:listsOftasks', JSON.stringify(newListOfTasks));
+            setListsOfTasks(newListOfTasks);
             setShowModal(false);
+            setName('');
         } catch (error) {
             Alert.alert('Não foi possivel salvar sua lista')
         }
     }
 
     async function handleRemove(taskId: number) {
-        const newTasks = tasks.filter(tasks => tasks.id != taskId);
+        const newListOfTasks = listsOfTasks.filter(listOfTasks => listOfTasks.id != taskId);
 
-        setTasks(newTasks);
-        await AsyncStorage.setItem(`@littlesky:tasks-${listId}`,JSON.stringify(newTasks));
+        setListsOfTasks(newListOfTasks);
+        await AsyncStorage.setItem('@littlesky:listsOftasks', JSON.stringify(newListOfTasks));
     }
 
     function handleInputChange(value: string) {
         setName(value);
     }
 
+    function handleTasks(id: number){
+        navigation.navigate('Tasks', {listId: id});
+    }
+
     return (
         <SafeAreaView style={styles.constainer}>
             {showModal && (<View style={styles.modal}>
-                <TouchableOpacity 
+                <TouchableOpacity
                     style={styles.modalBg}
                     onPress={() => setShowModal(false)}
                     activeOpacity={0.8}
                 />
                 <View style={styles.modalContainer}>
                     <View style={styles.modalBox}>
-                        <Text style={styles.modalTxt}>Nome da Tarefa</Text>
+                        <Text style={styles.modalTxt}>Nome da Lista</Text>
                         <TextInput
                             style={styles.modalInput}
-                            placeholder='Nova tarefa'
+                            placeholder='Nova lista'
                             onChangeText={handleInputChange}
                         />
                         <Button
@@ -115,22 +115,28 @@ export default function Tasks() {
                         />
                     </View>
                 </View>
-            </View> )}
+            </View>)}
             <View style={styles.wrapper} >
                 <View style={styles.contentListTaks}>
                     <FlatList
-                        data={tasks}
+                        data={listsOfTasks}
                         keyExtractor={(item) => `${item.id}`}
                         renderItem={({ item }) => (
                             <View style={styles.itemListTasks} >
-                        <Text style={styles.textListTasks}>{item.name}</Text>
-                        <RectButton
-                            style={styles.buttonRemove}
-                            onPress={() => handleRemove(item.id)}
-                        >
-                            <Feather name="trash" size={32} color={colors.red} />
-                        </RectButton>
-                    </View>
+                                <TouchableHighlight
+                                    style={styles.btnTask}
+                                    onPress={() => handleTasks(item.id)}
+                                    underlayColor='#ddd'
+                                >
+                                    <Text style={styles.textListTasks}>- {item.name}</Text>
+                                </TouchableHighlight>
+                                <RectButton
+                                    style={styles.buttonRemove}
+                                    onPress={() => handleRemove(item.id)}
+                                >
+                                    <Feather name="trash" size={32} color={colors.red} />
+                                </RectButton>
+                            </View>
                         )}
                         showsVerticalScrollIndicator={false}
                         numColumns={1}
@@ -145,16 +151,16 @@ export default function Tasks() {
                         onPress={() => handleBack()}
                     >
                         <Text style={styles.buttonText}>
-                        <Feather name="chevron-left" style={styles.buttonIcon} />
+                            <Feather name="chevron-left" style={styles.buttonIcon} />
                         </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                        style={styles.buttonNewTask}
+                        style={styles.buttonNewList}
                         activeOpacity={0.7}
                         onPress={() => setShowModal(true)}
                     >
                         <Text style={styles.buttonText}>
-                            NOVA TAREFA
+                            NOVA LISTA
                         </Text>
                     </TouchableOpacity>
                 </View>
@@ -190,7 +196,35 @@ const styles = StyleSheet.create({
         color: colors.heading,
         fontFamily: fonts.text,
     },
-    footerBtns:{
+    
+    contentListTaks: {
+        width: '100%',
+        padding: 20,
+        height: '80%',
+    },
+    itemListTasks: {
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        borderBottomColor: colors.sky_blue,
+        borderBottomWidth: 2,
+        paddingVertical: 5,
+    },
+    btnTask:{
+        width: 280,
+        display: 'flex',
+        paddingBottom: 10,
+    },
+    textListTasks: {
+        fontSize: 16,
+        alignContent: 'flex-start',
+        paddingTop: 20,
+    },
+    buttonRemove: {
+        paddingTop: 15,
+        alignContent: 'flex-end',
+    },
+    footerBtns: {
         width: '100%',
         display: 'flex',
         flexDirection: 'row',
@@ -211,7 +245,7 @@ const styles = StyleSheet.create({
         fontSize: 32,
         color: colors.white,
     },
-    buttonNewTask: {
+    buttonNewList: {
         backgroundColor: colors.sky_blue,
         color: colors.white,
         justifyContent: 'center',
@@ -225,27 +259,6 @@ const styles = StyleSheet.create({
     buttonText: {
         fontSize: 32,
         color: colors.white,
-    },
-    contentListTaks: {
-        width: '100%',
-        padding: 20,
-        height: '80%',
-    },
-    itemListTasks: {
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        borderBottomColor: colors.sky_blue,
-        borderBottomWidth: 2,
-        paddingVertical: 20,
-    },
-    textListTasks: {
-        fontSize: 16,
-        alignContent: 'flex-start',
-        paddingTop: 5,
-    },
-    buttonRemove: {
-        alignContent: 'flex-end',
     },
     modal: {
         position: 'absolute',

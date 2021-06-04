@@ -23,8 +23,8 @@ export default function MainMenu() {
         navigation.navigate('CrisisAlert');
     }
 
-    async function handleTasks() {
-        navigation.navigate('Tasks');
+    async function handleListsOfTasks() {
+        navigation.navigate('ListsOfTasks');
     }
 
     async function handleBreathingExercises() {
@@ -60,7 +60,7 @@ export default function MainMenu() {
                         <View style={styles.footer}>
                             <Button
                                 title='TAREFAS'
-                                onPress={handleTasks}
+                                onPress={handleListsOfTasks}
                             />
                         </View>
 

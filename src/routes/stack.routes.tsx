@@ -9,6 +9,7 @@ import AuthRoutes from './tabs.routes';
 import PlantSave from '../pages/PlantSave';
 import MainMenu from '../pages/MainMenu';
 import CrisisAlert from '../pages/CrisisAlert';
+import ListsOfTasks from '../pages/ListsOfTasks';
 import Tasks from '../pages/Tasks';
 import BreathingExercises from '../pages/BreathingExercises';
 import Distract from '../pages/Distract';
@@ -38,6 +39,11 @@ const AppRoutes: React.FC = () => (
         <stackRoutes.Screen
             name="CrisisAlert"
             component={CrisisAlert}
+        />
+
+        <stackRoutes.Screen
+            name="ListsOfTasks"
+            component={ListsOfTasks}
         />
 
         <stackRoutes.Screen
