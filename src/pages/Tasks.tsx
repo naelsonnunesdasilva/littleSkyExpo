@@ -8,7 +8,6 @@ import {
     View,
     Alert,
     FlatList,
-    CheckBox,
 } from 'react-native';
 import colors from '../styles/colors';
 import { Feather } from '@expo/vector-icons';
@@ -17,11 +16,13 @@ import fonts from '../styles/fonts';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import Button from '../components/Button';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import CheckBox from '@react-native-community/checkbox';
 
 export interface TasksProps {
     listId: number;
     id: number;
     name: string;
+    completed: boolean;
 }
 
 export default function Tasks() {
@@ -72,6 +73,7 @@ export default function Tasks() {
                 id,
                 name,
                 listId,
+                completed: false,
             });
 
             await AsyncStorage.setItem(`@littlesky:tasks-${listId}`, JSON.stringify(newTasks));
@@ -83,7 +85,20 @@ export default function Tasks() {
     }
 
     async function handleRemove(taskId: number) {
-        const newTasks = tasks.filter(tasks => tasks.id != taskId);
+        const newTasks = tasks.filter(task => task.id != taskId);
+
+        setTasks(newTasks);
+        await AsyncStorage.setItem(`@littlesky:tasks-${listId}`, JSON.stringify(newTasks));
+    }
+
+    async function handleCompleted(id: number, status: boolean) {
+        const newTasks = tasks.map(task => {
+            if (task.id === id) {
+                task.completed = status;
+            }
+
+            return task;
+        });
 
         setTasks(newTasks);
         await AsyncStorage.setItem(`@littlesky:tasks-${listId}`, JSON.stringify(newTasks));
@@ -93,7 +108,7 @@ export default function Tasks() {
         setName(value);
     }
 
-    function editTasks(id: number, name: string){
+    function editTasks(id: number, name: string) {
 
     }
 
@@ -127,27 +142,28 @@ export default function Tasks() {
                         keyExtractor={(item) => `${item.id}`}
                         renderItem={({ item }) => (
                             <View style={styles.itemListTasks} >
-                                <TouchableHighlight
-                                    style={styles.btnTask}
-                                    onPress={() => editTasks(item.id, item.name)}
-                                    underlayColor='#ddd'
-                                >
-                                    <Text style={styles.textListTasks}>- {item.name}</Text>
-                                </TouchableHighlight>
-                                <View>
-                                    <RectButton
-                                        style={styles.buttonRemove}
-                                        onPress={() => handleRemove(item.id)}
+                                <View style={styles.itemListTasksLeft} >
+                                    <CheckBox
+                                        style={{ transform: [{ scaleX: 1.2 }, { scaleY: 1.2 }], borderColor: '#FFF', }}
+                                        value={item.completed}
+                                        onValueChange={(newValue) => handleCompleted(item.id, newValue)}
+                                    />
+                                    <TouchableHighlight
+                                        style={styles.btnTask}
+                                        onPress={() => editTasks(item.id, item.name)}
+                                        underlayColor='#ddd'
                                     >
-                                        <Feather name="trash" size={32} color={colors.red} />
-                                    </RectButton>
-                                    <RectButton
-                                        style={styles.buttonRemove}
-                                        onPress={() => handleRemove(item.id)}
-                                    >
-                                        <Feather name="trash" size={32} color={colors.red} />
-                                    </RectButton>
+                                        <Text style={styles.textListTasks}>{item.name}</Text>
+                                    </TouchableHighlight>
+
                                 </View>
+                                <RectButton
+                                    style={styles.buttonRemove}
+                                    onPress={() => handleRemove(item.id)}
+                                >
+                                    <Feather name="trash" size={32} color={colors.red} />
+                                </RectButton>
+
                             </View>
                         )}
                         showsVerticalScrollIndicator={false}
@@ -258,11 +274,18 @@ const styles = StyleSheet.create({
         borderBottomWidth: 2,
         paddingVertical: 5,
     },
-    btnTask:{
-        width: 280,
+    itemListTasksLeft:{
+        display: 'flex',
+        flexDirection: 'row',
+    },
+    completed:{
+        fontSize: 5,
+    },
+    btnTask: {
+        width: 200,
         display: 'flex',
         paddingBottom: 10,
-        backgroundColor: '#ccc',
+        marginLeft: 5,
     },
     textListTasks: {
         fontSize: 16,
@@ -311,8 +334,5 @@ const styles = StyleSheet.create({
         marginTop: 5, padding: 10,
         marginBottom: 15,
         paddingVertical: 10,
-    },
-    modalBtn: {
-
     },
 })
