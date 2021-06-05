@@ -31,6 +31,7 @@ export default function Tasks() {
     const [name, setName] = useState<string>();
     const [tasks, setTasks] = useState<TasksProps[]>([]);
     const [showModal, setShowModal] = useState<boolean>(false);
+    const [selectedTask, setSelectedTask] = useState<any>({});
 
     const route = useRoute();
     const { listId } = route.params as TasksProps;
@@ -67,20 +68,38 @@ export default function Tasks() {
         }
 
         try {
-            const id: number = tasks.length ? Number(tasks[tasks.length - 1]['id']) + 1 : 1;
             let newTasks = tasks;
-            newTasks?.push({
-                id,
-                name,
-                listId,
-                completed: false,
-            });
+            if(!selectedTask.id){
+                const id: number = tasks.length ? Number(tasks[tasks.length - 1]['id']) + 1 : 1;
+                newTasks?.push({
+                    id,
+                    name,
+                    listId,
+                    completed: false,
+                });
+            } else {
+                newTasks = newTasks?.map(task => {
+                    if(task.id === selectedTask.id){
+                        task = {
+                            id: selectedTask.id,
+                            name,
+                            listId,
+                            completed: selectedTask.completed,
+                        };
+                    }
+
+                    return task;
+                });
+            }
 
             await AsyncStorage.setItem(`@littlesky:tasks-${listId}`, JSON.stringify(newTasks));
             setTasks(newTasks);
             setShowModal(false);
+            setName('');
+            setSelectedTask({} as any)
         } catch (error) {
-            Alert.alert('Não foi possivel salvar sua lista')
+            Alert.alert('Não foi possivel salvar sua lista', error);
+            console.log(error);
         }
     }
 
@@ -108,8 +127,10 @@ export default function Tasks() {
         setName(value);
     }
 
-    function editTasks(id: number, name: string) {
-
+    function editTasks(task: TasksProps) {
+        setName(task.name);
+        setSelectedTask(task);
+        setShowModal(true);
     }
 
     return (
@@ -124,6 +145,7 @@ export default function Tasks() {
                     <View style={styles.modalBox}>
                         <Text style={styles.modalTxt}>Nome da Tarefa</Text>
                         <TextInput
+                            value={name}
                             style={styles.modalInput}
                             placeholder='Nova tarefa'
                             onChangeText={handleInputChange}
@@ -150,7 +172,7 @@ export default function Tasks() {
                                     />
                                     <TouchableHighlight
                                         style={styles.btnTask}
-                                        onPress={() => editTasks(item.id, item.name)}
+                                        onPress={() => editTasks(item)}
                                         underlayColor='#ddd'
                                     >
                                         <Text style={styles.textListTasks}>{item.name}</Text>
