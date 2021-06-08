@@ -59,17 +59,22 @@ export default function BreathingExercises() {
         <SafeAreaView style={styles.constainer}>
             <View style={styles.wrapper} >
                 <View style={styles.contentBreathing}>
-                    <Text style={styles.title}>Procure se acalmar e respirar de forma tranquila por mais:{'\n'} </Text>
-                    <Text style={styles.subtitle}>{time} segundos</Text>
+                    <View>
+                        <Text style={styles.title}>Procure se acalmar e respirar de forma tranquila por mais:{'\n'} </Text>
+                        <Text style={styles.subtitle}>{time} segundos</Text>
+                    </View>
 
-                    <LottieView
-                        source={breathingAnimation}
-                        autoPlay
-                        loop
-                        style={styles.animation}
-                    />
-                    <Text style={styles.sentence}>{activeSentence}</Text>
-                    <Text></Text>
+                    <View style={styles.breathe}>
+                        <LottieView
+                            source={breathingAnimation}
+                            autoPlay
+                            loop
+                            style={styles.animation}
+                        />
+                    </View>
+                    <View>
+                        <Text style={styles.sentence}>"{activeSentence}"</Text>
+                    </View>
                 </View>
                 <View style={styles.footerBtns}>
                     <TouchableOpacity
@@ -102,7 +107,6 @@ const styles = StyleSheet.create({
         padding: 20,
         height: '80%',
         display: 'flex',
-        alignItems: 'center',
         marginTop: 5,
     },
     title: {
@@ -120,13 +124,20 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         color: colors.heading,
         fontFamily: fonts.text,
-        marginTop: 0,
+        marginTop: -20,
+    },
+    breathe: {
+        width: '100%',
+        height: 380,
+        marginTop: -80,
     },
     animation: {
 
     },
     sentence: {
-
+        fontSize: 20,
+        color: colors.heading,
+        fontFamily: fonts.text,
     },
     footerBtns: {
         width: '100%',
