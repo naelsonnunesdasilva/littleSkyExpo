@@ -12,15 +12,17 @@ import fonts from '../styles/fonts';
 import LottieView from 'lottie-react-native';
 import breathingAnimation from '../assets/breathing.json';
 import { useNavigation } from '@react-navigation/native';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function BreathingExercises() {
 
     const navigation = useNavigation();
-    const defaulTime: number = 60;
+    let countdownTimeOut: any;
+    let sentenceTime: any;
 
-    const [time, setTime] = useState<number>(defaulTime);
-    const [activeCountdown, setActiveCountdown] = useState<boolean>(true);
+    const [defaulTime, setDefaultTime] = useState<number>(60);
+    const [time, setTime] = useState<number>(0);
+    const [activeCountdown, setActiveCountdown] = useState<boolean>(false);
     const [activeSentence, setActiveSentence] = useState<string>('');
 
     function handleBack() {
@@ -35,46 +37,102 @@ export default function BreathingExercises() {
         'Esta tudo bem, descanse um pouco agora e se imagine em um lugar que te trás paz',
     ];
 
-    function countdown(timeNow: number) {
-        if (!timeNow) {
-            setTime(defaulTime);
-            setActiveCountdown(false);
-            return;
+    async function startCountdown() {
+        const dataDefaulTime = await AsyncStorage.getItem(`@littlesky:defaultTime`);
+        if(dataDefaulTime){
+            setDefaultTime(parseInt(dataDefaulTime));
         }
 
-        setActiveSentence(sentences[0]);
+        setTime(defaulTime? Number(defaulTime) : 60);
 
-        timeNow -= 1;
-        setTime(timeNow);
-        setTimeout(() => countdown(timeNow), 1000);
+        const index: number = Math.floor(Math.random() * sentences.length);;
+
+        clearTimeout(sentenceTime);
+        sentenceTime = setTimeout(() => {
+            setActiveSentence(`"${sentences[index]}"`);
+        }, 6000);
+
+        setActiveCountdown(true);
+    }
+
+    async function newDefaultTime(newTime: number){
+        setDefaultTime(newTime);
+        await AsyncStorage.setItem(`@littlesky:defaultTime`, JSON.stringify(newTime));
+
     }
 
     useEffect(() => {
-        if (activeCountdown) {
-            setTimeout(() => countdown(time), 1000);
+        if (activeCountdown && time > 0) {
+            countdownTimeOut = setTimeout(() => {
+                setTime(time - 1);
+            }, 1000);
+        } else if (activeCountdown && !time) {
+            setActiveCountdown(false);
+            setActiveSentence('');
+            clearTimeout(countdownTimeOut);
         }
-    }, [activeCountdown]);
+    }, [activeCountdown, time]);
+
+    useEffect(() => {
+        startCountdown();
+    }, []);
 
     return (
         <SafeAreaView style={styles.constainer}>
             <View style={styles.wrapper} >
                 <View style={styles.contentBreathing}>
-                    <View>
-                        <Text style={styles.title}>Procure se acalmar e respirar de forma tranquila por mais:{'\n'} </Text>
-                        <Text style={styles.subtitle}>{time} segundos</Text>
-                    </View>
+                    {
+                        activeCountdown ?
+                            (
+                                <View>
+                                    <View>
+                                        <Text style={styles.title}>Procure se acalmar e respirar de forma tranquila por mais:{'\n'} </Text>
+                                        <Text style={styles.subtitle}>{time} segundos</Text>
+                                    </View>
 
-                    <View style={styles.breathe}>
-                        <LottieView
-                            source={breathingAnimation}
-                            autoPlay
-                            loop
-                            style={styles.animation}
-                        />
-                    </View>
-                    <View>
-                        <Text style={styles.sentence}>"{activeSentence}"</Text>
-                    </View>
+                                    <View style={styles.breathe}>
+                                        <LottieView
+                                            source={breathingAnimation}
+                                            autoPlay
+                                            loop
+                                            style={styles.animation}
+                                        />
+                                    </View>
+                                    <View>
+                                        <Text style={styles.sentence}>{activeSentence}</Text>
+                                    </View>
+                                </View>
+                            )
+                            :
+                            (
+                                <View>
+                                    <View>
+                                        <Text style={styles.title}></Text>
+                                        <Text style={styles.subtitle}>Tempo do cronometro: </Text>
+                                    </View>
+
+                                    <View style={styles.breathe}>
+                                        <TouchableOpacity
+                                            style={styles.btnStartAndStop}
+                                            activeOpacity={0.7}
+                                            onPress={() => newDefaultTime(defaulTime-1)}
+                                        >
+                                            <Text style={styles.buttonText}>+</Text>
+                                        </TouchableOpacity>
+                                        <View>
+                                            <Text>{defaulTime}</Text>
+                                        </View>
+                                        <TouchableOpacity
+                                            style={styles.btnStartAndStop}
+                                            activeOpacity={0.7}
+                                            onPress={() => newDefaultTime(defaulTime+1)}
+                                        >
+                                            <Text style={styles.buttonText}>-</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                            )
+                    }
                 </View>
                 <View style={styles.footerBtns}>
                     <TouchableOpacity
@@ -84,8 +142,31 @@ export default function BreathingExercises() {
                     >
                         <Text style={styles.buttonText}>
                             <Feather name="chevron-left" style={styles.buttonIcon} />
+
                         </Text>
                     </TouchableOpacity>
+                    {
+                        activeCountdown ?
+                            (
+                                <TouchableOpacity
+                                    style={styles.btnStartAndStop}
+                                    activeOpacity={0.7}
+                                    onPress={() => setActiveCountdown(!activeCountdown)}
+                                >
+                                    <Text style={styles.buttonText}>Parar</Text>
+                                </TouchableOpacity>
+                            )
+                            :
+                            (
+                                <TouchableOpacity
+                                    style={styles.btnStartAndStop}
+                                    activeOpacity={0.7}
+                                    onPress={() => startCountdown()}
+                                >
+                                    <Text style={styles.buttonText}>Iniciar</Text>
+                                </TouchableOpacity>
+                            )
+                    }
                 </View>
             </View>
         </SafeAreaView>
@@ -160,7 +241,7 @@ const styles = StyleSheet.create({
         fontSize: 32,
         color: colors.white,
     },
-    buttonNewList: {
+    btnStartAndStop: {
         backgroundColor: colors.sky_blue,
         color: colors.white,
         justifyContent: 'center',
