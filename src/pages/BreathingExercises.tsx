@@ -43,6 +43,8 @@ export default function BreathingExercises() {
             setDefaultTime(parseInt(dataDefaulTime));
         }
 
+        console.log('###### ', dataDefaulTime);
+
         setTime(defaulTime? Number(defaulTime) : 60);
 
         const index: number = Math.floor(Math.random() * sentences.length);;
@@ -57,11 +59,14 @@ export default function BreathingExercises() {
 
     async function newDefaultTime(newTime: number){
         setDefaultTime(newTime);
-        await AsyncStorage.setItem(`@littlesky:defaultTime`, JSON.stringify(newTime));
+        await AsyncStorage.setItem(`@littlesky:defaultTime`, `${newTime}`);
 
     }
 
+    async function stopCountdown(){}
+
     useEffect(() => {
+        clearTimeout(sentenceTime);
         if (activeCountdown && time > 0) {
             countdownTimeOut = setTimeout(() => {
                 setTime(time - 1);
@@ -69,7 +74,6 @@ export default function BreathingExercises() {
         } else if (activeCountdown && !time) {
             setActiveCountdown(false);
             setActiveSentence('');
-            clearTimeout(countdownTimeOut);
         }
     }, [activeCountdown, time]);
 
