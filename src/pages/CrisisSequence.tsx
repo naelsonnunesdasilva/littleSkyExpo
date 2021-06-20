@@ -16,6 +16,7 @@ import fonts from '../styles/fonts';
 import { useNavigation } from '@react-navigation/native';
 import Button from '../components/Button';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Picker } from '@react-native-picker/picker';
 
 export interface ListsOfTasksProps {
     id: number;
@@ -29,6 +30,7 @@ export default function CrisisSequence() {
     const [name, setName] = useState<string>();
     const [listsOfTasks, setListsOfTasks] = useState<ListsOfTasksProps[]>([]);
     const [showModal, setShowModal] = useState<boolean>(false);
+    const [selectedLanguage, setSelectedLanguage] = useState('java');
 
     async function fetchTasks() {
         const oldlistOfTasks: ListsOfTasksProps[] = await loadTasks();
@@ -89,8 +91,8 @@ export default function CrisisSequence() {
         setName(value);
     }
 
-    function handleTasks(id: number){
-        navigation.navigate('Tasks', {listId: id});
+    function handleTasks(id: number) {
+        navigation.navigate('Tasks', { listId: id });
     }
 
     return (
@@ -104,11 +106,15 @@ export default function CrisisSequence() {
                 <View style={styles.modalContainer}>
                     <View style={styles.modalBox}>
                         <Text style={styles.modalTxt}>Nome da Lista</Text>
-                        <TextInput
-                            style={styles.modalInput}
-                            placeholder='Nova lista'
-                            onChangeText={handleInputChange}
-                        />
+                        <Picker
+                            style={styles.selectInput}
+                            selectedValue={selectedLanguage}
+                            onValueChange={(itemValue, itemIndex) =>
+                                setSelectedLanguage(itemValue)
+                            }>
+                            <Picker.Item label="Exercicios de respiração" value="respiracao" />
+                            <Picker.Item label="Escrever" value="escrever" />
+                        </Picker>
                         <Button
                             title='ADICIONAR'
                             onPress={handleNewTask}
@@ -205,7 +211,7 @@ const styles = StyleSheet.create({
         color: colors.heading,
         fontFamily: fonts.text,
     },
-    
+
     contentListTaks: {
         width: '100%',
         padding: 20,
@@ -220,7 +226,7 @@ const styles = StyleSheet.create({
         borderBottomWidth: 2,
         paddingVertical: 5,
     },
-    btnTask:{
+    btnTask: {
         width: 280,
         display: 'flex',
         paddingBottom: 10,
@@ -300,17 +306,13 @@ const styles = StyleSheet.create({
     modalTxt: {
         fontSize: 16,
     },
-    modalInput: {
+    selectInput: {
         borderBottomWidth: 1,
         borderColor: colors.gray,
         color: colors.heading,
         width: '100%',
-        fontSize: 18,
-        marginTop: 5, padding: 10,
-        marginBottom: 15,
+        fontSize: 20,
+        marginVertical: 20,
         paddingVertical: 10,
-    },
-    modalBtn: {
-
     },
 })
