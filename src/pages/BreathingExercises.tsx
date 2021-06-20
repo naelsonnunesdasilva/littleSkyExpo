@@ -39,17 +39,16 @@ export default function BreathingExercises() {
 
     async function startCountdown() {
         const dataDefaulTime = await AsyncStorage.getItem(`@littlesky:defaultTime`);
-        if(dataDefaulTime){
+        if (dataDefaulTime) {
             setDefaultTime(parseInt(dataDefaulTime));
         }
 
-        console.log('###### ', dataDefaulTime);
+        setTime(dataDefaulTime ? Number(dataDefaulTime) : 60);
 
-        setTime(defaulTime? Number(defaulTime) : 60);
-
-        const index: number = Math.floor(Math.random() * sentences.length);;
+        const index: number = Math.floor(Math.random() * sentences.length);
 
         clearTimeout(sentenceTime);
+        setActiveSentence('');
         sentenceTime = setTimeout(() => {
             setActiveSentence(`"${sentences[index]}"`);
         }, 6000);
@@ -57,13 +56,16 @@ export default function BreathingExercises() {
         setActiveCountdown(true);
     }
 
-    async function newDefaultTime(newTime: number){
+    async function newDefaultTime(newTime: number) {
         setDefaultTime(newTime);
         await AsyncStorage.setItem(`@littlesky:defaultTime`, `${newTime}`);
 
     }
 
-    async function stopCountdown(){}
+    async function stopCountdown() {
+        setActiveCountdown(false);
+        setActiveSentence('');
+    }
 
     useEffect(() => {
         clearTimeout(sentenceTime);
@@ -72,8 +74,7 @@ export default function BreathingExercises() {
                 setTime(time - 1);
             }, 1000);
         } else if (activeCountdown && !time) {
-            setActiveCountdown(false);
-            setActiveSentence('');
+            stopCountdown();
         }
     }, [activeCountdown, time]);
 
@@ -99,7 +100,6 @@ export default function BreathingExercises() {
                                             source={breathingAnimation}
                                             autoPlay
                                             loop
-                                            style={styles.animation}
                                         />
                                     </View>
                                     <View>
@@ -115,21 +115,21 @@ export default function BreathingExercises() {
                                         <Text style={styles.subtitle}>Tempo do cronometro: </Text>
                                     </View>
 
-                                    <View style={styles.breathe}>
+                                    <View style={styles.setCountdownTime}>
                                         <TouchableOpacity
-                                            style={styles.btnStartAndStop}
+                                            style={styles.btnMoreTime}
                                             activeOpacity={0.7}
-                                            onPress={() => newDefaultTime(defaulTime-1)}
+                                            onPress={() => newDefaultTime(defaulTime + 1)}
                                         >
                                             <Text style={styles.buttonText}>+</Text>
                                         </TouchableOpacity>
                                         <View>
-                                            <Text>{defaulTime}</Text>
+                                            <Text style={styles.textTime}>{defaulTime}</Text>
                                         </View>
                                         <TouchableOpacity
-                                            style={styles.btnStartAndStop}
+                                            style={styles.btnLessTime}
                                             activeOpacity={0.7}
-                                            onPress={() => newDefaultTime(defaulTime+1)}
+                                            onPress={() => newDefaultTime(defaulTime - 1)}
                                         >
                                             <Text style={styles.buttonText}>-</Text>
                                         </TouchableOpacity>
@@ -155,7 +155,7 @@ export default function BreathingExercises() {
                                 <TouchableOpacity
                                     style={styles.btnStartAndStop}
                                     activeOpacity={0.7}
-                                    onPress={() => setActiveCountdown(!activeCountdown)}
+                                    onPress={() => stopCountdown()}
                                 >
                                     <Text style={styles.buttonText}>Parar</Text>
                                 </TouchableOpacity>
@@ -216,8 +216,39 @@ const styles = StyleSheet.create({
         height: 380,
         marginTop: -80,
     },
-    animation: {
-
+    setCountdownTime: {
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 20,
+    },
+    btnMoreTime: {
+        backgroundColor: colors.sky_blue,
+        color: colors.white,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 16,
+        marginTop: 10,
+        marginBottom: 10,
+        height: 56,
+        width: 56,
+    },
+    textTime: {
+        fontSize: 30,
+        color: colors.heading,
+        marginHorizontal: 25,
+    },
+    btnLessTime: {
+        backgroundColor: colors.sky_blue,
+        color: colors.white,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 16,
+        marginTop: 10,
+        marginBottom: 10,
+        height: 56,
+        width: 56,
     },
     sentence: {
         fontSize: 20,

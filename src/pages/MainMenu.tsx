@@ -1,21 +1,23 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     StyleSheet,
     SafeAreaView,
     View,
     Text,
-    TextInput,
-    KeyboardAvoidingView,
-    Platform,
-    Alert
 } from 'react-native';
 import colors from '../styles/colors';
 import fonts from '../styles/fonts';
 import Button from '../components/Button';
 import { useNavigation } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+const saintsSentences = require('../services/saintsSentences.json');
+
+export interface SaintsSentencesProps {
+    sentence: string;
+    author: string,
+}
 
 export default function MainMenu() {
+    const [sentence, setSentece] = useState<SaintsSentencesProps>({ sentence: '', author: '' });
 
     const navigation = useNavigation();
 
@@ -35,50 +37,65 @@ export default function MainMenu() {
         navigation.navigate('Distract');
     }
 
+    async function randomSentence() {
+        const index: number = Math.floor(Math.random() * saintsSentences.sentences.length);
+
+        setSentece(saintsSentences.sentences[index]);
+    }
+
+    useEffect(() => {
+        randomSentence();
+    }, []);
+
     return (
         <SafeAreaView style={styles.container}>
-                <View style={styles.content}>
-                    <View style={styles.form}>
-                        <View style={styles.header}>
-                            <Text style={styles.emoji}>
-                                😃
-                            </Text>
+            <View style={styles.content}>
+                <View style={styles.form}>
+                    <View style={styles.header}>
+                        <Text style={styles.emoji}>
+                            😃
+                        </Text>
 
-                            <Text style={styles.title}>
-                                Escolha uma{'\n'}
-                                ação abaixo.
-                            </Text>
-                        </View>
+                        <Text style={styles.title}>
+                            Escolha uma{'\n'}
+                            ação abaixo.
+                        </Text>
+                    </View>
 
-                        <View style={styles.footer}>
-                            <Button
-                                title='ALERTA DE CRISE'
-                                onPress={handleCrisisAlert}
-                            />
-                        </View>
+                    <View style={styles.itemMenu}>
+                        <Button
+                            title='ALERTA DE CRISE'
+                            onPress={handleCrisisAlert}
+                        />
+                    </View>
 
-                        <View style={styles.footer}>
-                            <Button
-                                title='TAREFAS'
-                                onPress={handleListsOfTasks}
-                            />
-                        </View>
+                    <View style={styles.itemMenu}>
+                        <Button
+                            title='TAREFAS'
+                            onPress={handleListsOfTasks}
+                        />
+                    </View>
 
-                        <View style={styles.footer}>
-                            <Button
-                                title='EXERCÍCIOS DE RESPIRAÇÃO'
-                                onPress={handleBreathingExercises}
-                            />
-                        </View>
+                    <View style={styles.itemMenu}>
+                        <Button
+                            title='EXERCÍCIOS DE RESPIRAÇÃO'
+                            onPress={handleBreathingExercises}
+                        />
+                    </View>
 
-                        <View style={styles.footer}>
-                            <Button
-                                title='DISTRAIR'
-                                onPress={handleDistract}
-                            />
-                        </View>
+                    <View style={styles.itemMenu}>
+                        <Button
+                            title='DISTRAIR'
+                            onPress={handleDistract}
+                        />
                     </View>
                 </View>
+                <View style={styles.sentenceContent}>
+                    <Text style={styles.sentence}>"{sentence.sentence}" - {sentence.author}</Text>
+                </View>
+            </View>
+
+
 
         </SafeAreaView>
     )
@@ -125,9 +142,23 @@ const styles = StyleSheet.create({
         lineHeight: 32,
         marginTop: 20,
     },
-    footer: {
+    itemMenu: {
         width: '100%',
         marginTop: 40,
-        paddingHorizontal: 20,
+        paddingHorizontal: 15,
+    },
+    sentenceContent: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-around',
+    },
+    sentence: {
+        width: '90%',
+        marginTop: -20,
+        marginBottom: 30,
+        textAlign: 'center',
+        fontSize: 19,
+        color: colors.heading,
+        fontFamily: fonts.text,
     }
 })
