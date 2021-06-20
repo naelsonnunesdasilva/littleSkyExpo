@@ -23,7 +23,7 @@ export interface ListsOfTasksProps {
     dateTimeNotification: Date | null,
 }
 
-export default function ListsOfTasks() {
+export default function CrisisSequence() {
     const navigation = useNavigation();
 
     const [name, setName] = useState<string>();

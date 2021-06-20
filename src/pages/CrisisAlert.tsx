@@ -17,7 +17,7 @@ import { useNavigation } from '@react-navigation/native';
 import Button from '../components/Button';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export interface ListsOfTasksProps {
+export interface ListsOfSequencesProps {
     id: number;
     name: string;
     dateTimeNotification: Date | null,
@@ -27,23 +27,23 @@ export default function CrisisAlert() {
     const navigation = useNavigation();
 
     const [name, setName] = useState<string>();
-    const [listsOfTasks, setListsOfTasks] = useState<ListsOfTasksProps[]>([]);
+    const [listsOfSequences, setListsOfSequences] = useState<ListsOfSequencesProps[]>([]);
     const [showModal, setShowModal] = useState<boolean>(false);
 
-    async function fetchTasks() {
-        const oldlistOfTasks: ListsOfTasksProps[] = await loadTasks();
+    async function fetchSequences() {
+        const oldlistOfSequences: ListsOfSequencesProps[] = await loadSequences();
 
-        setListsOfTasks(oldlistOfTasks);
+        setListsOfSequences(oldlistOfSequences);
     }
 
     useEffect(() => {
-        fetchTasks();
+        fetchSequences();
     }, []);
 
-    async function loadTasks(): Promise<ListsOfTasksProps[]> {
+    async function loadSequences(): Promise<ListsOfSequencesProps[]> {
         try {
             const data = await AsyncStorage.getItem('@littlesky:listsOfSequences');
-            return data ? (JSON.parse(data) as ListsOfTasksProps[]) : [];
+            return data ? (JSON.parse(data) as ListsOfSequencesProps[]) : [];
 
 
         } catch (error) {
@@ -55,22 +55,22 @@ export default function CrisisAlert() {
         navigation.goBack();
     }
 
-    async function handleNewTask() {
+    async function handleNewSequence() {
         if (!name) {
             return Alert.alert('Adicione um nome à sequência.')
         }
 
         try {
-            const id: number = listsOfTasks.length ? Number(listsOfTasks[listsOfTasks.length - 1]['id']) + 1 : 1;
-            let newListOfTasks = listsOfTasks;
-            newListOfTasks?.push({
+            const id: number = listsOfSequences.length ? Number(listsOfSequences[listsOfSequences.length - 1]['id']) + 1 : 1;
+            let newListOfSequences = listsOfSequences;
+            newListOfSequences?.push({
                 id,
                 name,
                 dateTimeNotification: null,
             });
 
-            await AsyncStorage.setItem('@littlesky:listsOfSequences', JSON.stringify(newListOfTasks));
-            setListsOfTasks(newListOfTasks);
+            await AsyncStorage.setItem('@littlesky:listsOfSequences', JSON.stringify(newListOfSequences));
+            setListsOfSequences(newListOfSequences);
             setShowModal(false);
             setName('');
         } catch (error) {
@@ -78,18 +78,18 @@ export default function CrisisAlert() {
         }
     }
 
-    async function handleRemove(taskId: number) {
-        const newListOfTasks = listsOfTasks.filter(listOfTasks => listOfTasks.id != taskId);
+    async function handleRemove(sequenceId: number) {
+        const newListOfSequences = listsOfSequences.filter(listOfSequences => listOfSequences.id != sequenceId);
 
-        setListsOfTasks(newListOfTasks);
-        await AsyncStorage.setItem('@littlesky:listsOfSequences', JSON.stringify(newListOfTasks));
+        setListsOfSequences(newListOfSequences);
+        await AsyncStorage.setItem('@littlesky:listsOfSequences', JSON.stringify(newListOfSequences));
     }
 
     function handleInputChange(value: string) {
         setName(value);
     }
 
-    function handleTasks(id: number){
+    function handleSequences(id: number){
         navigation.navigate('CrisisSequence', {seuqenceId: id});
     }
 
@@ -111,7 +111,7 @@ export default function CrisisAlert() {
                         />
                         <Button
                             title='ADICIONAR'
-                            onPress={handleNewTask}
+                            onPress={handleNewSequence}
                         />
                     </View>
                 </View>
@@ -119,16 +119,16 @@ export default function CrisisAlert() {
             <View style={styles.wrapper} >
                 <View style={styles.contentListTaks}>
                     <FlatList
-                        data={listsOfTasks}
+                        data={listsOfSequences}
                         keyExtractor={(item) => `${item.id}`}
                         renderItem={({ item }) => (
-                            <View style={styles.itemListTasks} >
+                            <View style={styles.itemListSequences} >
                                 <TouchableHighlight
-                                    style={styles.btnTask}
-                                    onPress={() => handleTasks(item.id)}
+                                    style={styles.btnSequence}
+                                    onPress={() => handleSequences(item.id)}
                                     underlayColor='#ddd'
                                 >
-                                    <Text style={styles.textListTasks}>- {item.name}</Text>
+                                    <Text style={styles.textListSequences}>- {item.name}</Text>
                                 </TouchableHighlight>
                                 <RectButton
                                     style={styles.buttonRemove}
@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
         height: '80%',
         marginTop: 5,
     },
-    itemListTasks: {
+    itemListSequences: {
         display: 'flex',
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -211,12 +211,12 @@ const styles = StyleSheet.create({
         borderBottomWidth: 2,
         paddingVertical: 5,
     },
-    btnTask:{
+    btnSequence:{
         width: 280,
         display: 'flex',
         paddingBottom: 10,
     },
-    textListTasks: {
+    textListSequences: {
         fontSize: 16,
         alignContent: 'flex-start',
         paddingTop: 20,
@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
         width: '80%',
     },
     buttonText: {
-        fontSize: 32,
+        fontSize: 28,
         color: colors.white,
     },
     modal: {
