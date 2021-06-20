@@ -160,7 +160,16 @@ export default function CrisisSequence() {
                         onPress={() => setShowModal(true)}
                     >
                         <Text style={styles.buttonText}>
-                            NOVA LISTA
+                            NOVO ITEM
+                        </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.buttonNewList}
+                        activeOpacity={0.7}
+                        onPress={() => setShowModal(true)}
+                    >
+                        <Text style={styles.buttonText}>
+                            INICIAR
                         </Text>
                     </TouchableOpacity>
                 </View>
@@ -258,10 +267,10 @@ const styles = StyleSheet.create({
         marginTop: 10,
         marginBottom: 10,
         height: 56,
-        width: '80%',
+        width: '40%',
     },
     buttonText: {
-        fontSize: 32,
+        fontSize: 20,
         color: colors.white,
     },
     modal: {
