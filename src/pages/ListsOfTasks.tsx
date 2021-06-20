@@ -8,6 +8,7 @@ import {
     View,
     Alert,
     FlatList,
+    Picker,
 } from 'react-native';
 import colors from '../styles/colors';
 import { Feather } from '@expo/vector-icons';
