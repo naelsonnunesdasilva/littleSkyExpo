@@ -8,6 +8,7 @@ import {
     View,
     Alert,
     FlatList,
+    ScrollView,
 } from 'react-native';
 import colors from '../styles/colors';
 import { Feather } from '@expo/vector-icons';
@@ -117,7 +118,7 @@ export default function ListsOfTasks() {
                 </View>
             </View>)}
             <View style={styles.wrapper} >
-                <View style={styles.contentListTaks}>
+                <ScrollView style={styles.contentListTaks}>
                     <FlatList
                         data={listsOfTasks}
                         keyExtractor={(item) => `${item.id}`}
@@ -142,7 +143,7 @@ export default function ListsOfTasks() {
                         numColumns={1}
                     />
 
-                </View>
+                </ScrollView>
 
                 <View style={styles.footerBtns}>
                     <TouchableOpacity

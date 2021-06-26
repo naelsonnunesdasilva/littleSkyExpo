@@ -4,11 +4,13 @@ import {
     SafeAreaView,
     View,
     Text,
+    TouchableOpacity,
 } from 'react-native';
 import colors from '../styles/colors';
 import fonts from '../styles/fonts';
 import Button from '../components/Button';
 import { useNavigation } from '@react-navigation/native';
+import { Feather } from '@expo/vector-icons';
 const saintsSentences = require('../services/saintsSentences.json');
 
 export interface SaintsSentencesProps {
@@ -17,38 +19,20 @@ export interface SaintsSentencesProps {
 }
 
 export default function Distract() {
-    const [sentence, setSentece] = useState<SaintsSentencesProps>({ sentence: '', author: '' });
 
     const navigation = useNavigation();
 
-    async function handleCrisisAlert() {
-        navigation.navigate('CrisisAlert');
+    async function handleVideos() {
+        navigation.navigate('Videos');
     }
 
-    async function handleListsOfTasks() {
-        navigation.navigate('ListsOfTasks');
+    async function handleRead() {
+        navigation.navigate('Read');
     }
 
-    async function handleBreathingExercises() {
-        navigation.navigate('BreathingExercises', {opts: {
-            currentEvent: -1,
-            itens: [],
-        }});
+    function handleBack() {
+        navigation.goBack();
     }
-
-    async function handleDistract() {
-        navigation.navigate('Distract');
-    }
-
-    async function randomSentence() {
-        const index: number = Math.floor(Math.random() * saintsSentences.sentences.length);
-
-        setSentece(saintsSentences.sentences[index]);
-    }
-
-    useEffect(() => {
-        randomSentence();
-    }, []);
 
     return (
         <SafeAreaView style={styles.container}>
@@ -56,7 +40,7 @@ export default function Distract() {
                 <View style={styles.form}>
                     <View style={styles.header}>
                         <Text style={styles.emoji}>
-                        🎲
+                            🎲
                         </Text>
 
                         <Text style={styles.title}>
@@ -68,38 +52,30 @@ export default function Distract() {
                     <View style={styles.itemMenu}>
                         <Button
                             title='VÍDEOS'
-                            onPress={handleCrisisAlert}
+                            onPress={handleVideos}
                         />
                     </View>
 
                     <View style={styles.itemMenu}>
                         <Button
                             title='LER'
-                            onPress={handleListsOfTasks}
-                        />
-                    </View>
-
-                    <View style={styles.itemMenu}>
-                        <Button
-                            title='EXERCÍCIOS DE RESPIRAÇÃO'
-                            onPress={handleBreathingExercises}
-                        />
-                    </View>
-
-                    <View style={styles.itemMenu}>
-                        <Button
-                            title='DISTRAIR'
-                            onPress={handleDistract}
+                            onPress={handleRead}
                         />
                     </View>
                 </View>
-                <View style={styles.sentenceContent}>
-                    <Text style={styles.sentence}>"{sentence.sentence}" - {sentence.author}</Text>
-                </View>
+
+                <View style={styles.footerBtns}>
+                        <TouchableOpacity
+                            style={styles.buttonBack}
+                            activeOpacity={0.7}
+                            onPress={() => handleBack()}
+                        >
+                            <Text style={styles.buttonText}>
+                                <Feather name="chevron-left" style={styles.buttonIcon} />
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
             </View>
-
-
-
         </SafeAreaView>
     )
 }
@@ -150,18 +126,42 @@ const styles = StyleSheet.create({
         marginTop: 40,
         paddingHorizontal: 15,
     },
-    sentenceContent: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-around',
-    },
-    sentence: {
+    footerBtns: {
         width: '90%',
-        marginTop: -20,
-        marginBottom: 30,
-        textAlign: 'center',
-        fontSize: 19,
-        color: colors.heading,
-        fontFamily: fonts.text,
-    }
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginLeft: '5%',
+        marginBottom: 10,
+    },
+    buttonBack: {
+        backgroundColor: colors.sky_blue,
+        color: colors.white,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 16,
+        marginTop: 10,
+        marginBottom: 10,
+        height: 56,
+        width: '18%',
+    },
+    buttonIcon: {
+        fontSize: 32,
+        color: colors.white,
+    },
+    buttonNewTask: {
+        backgroundColor: colors.sky_blue,
+        color: colors.white,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 16,
+        marginTop: 10,
+        marginBottom: 10,
+        height: 56,
+        width: '80%',
+    },
+    buttonText: {
+        fontSize: 32,
+        color: colors.white,
+    },
 })

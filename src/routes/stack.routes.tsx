@@ -15,6 +15,8 @@ import Tasks from '../pages/Tasks';
 import BreathingExercises from '../pages/BreathingExercises';
 import Distract from '../pages/Distract';
 import Write from '../pages/Write';
+import Videos from '../pages/Videos';
+import Read from '../pages/Read';
 
 const stackRoutes = createStackNavigator();
 
@@ -70,6 +72,16 @@ const AppRoutes: React.FC = () => (
         <stackRoutes.Screen
             name="Distract"
             component={Distract}
+        />
+
+        <stackRoutes.Screen
+            name="Videos"
+            component={Videos}
+        />
+
+        <stackRoutes.Screen
+            name="Read"
+            component={Read}
         />
 
         <stackRoutes.Screen
