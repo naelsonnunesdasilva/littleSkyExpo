@@ -86,7 +86,7 @@ export default function BreathingExercises() {
         } else if (activeCountdown && !time) {
             stopCountdown();
 
-            if(opts.currentEvent >= 0){
+            if (opts.currentEvent >= 0) {
                 nextEvent();
             }
         }
@@ -96,7 +96,7 @@ export default function BreathingExercises() {
         startCountdown();
     }, []);
 
-    function nextEvent(){
+    function nextEvent() {
         const newOpts = {
             currentEvent: opts.currentEvent + 1,
             itens: opts.itens,
@@ -104,15 +104,15 @@ export default function BreathingExercises() {
 
         let page;
 
-        if(newOpts.currentEvent === newOpts.itens.length){
+        if (newOpts.currentEvent === newOpts.itens.length) {
             page = 'CrisisAlert';
-        }else if(newOpts.itens[newOpts.currentEvent].itemName === 'respiracao'){
+        } else if (newOpts.itens[newOpts.currentEvent].itemName === 'respiracao') {
             page = 'BreathingExercises';
-        }else{
+        } else {
             page = 'Write';
         }
 
-        navigation.navigate(page, {opts: newOpts});
+        navigation.navigate(page, { opts: newOpts });
     }
 
     return (
@@ -149,16 +149,7 @@ export default function BreathingExercises() {
                                     </View>
 
                                     <View style={styles.setCountdownTime}>
-                                        <TouchableOpacity
-                                            style={styles.btnMoreTime}
-                                            activeOpacity={0.7}
-                                            onPress={() => newDefaultTime(defaulTime + 1)}
-                                        >
-                                            <Text style={styles.buttonText}>+</Text>
-                                        </TouchableOpacity>
-                                        <View>
-                                            <Text style={styles.textTime}>{defaulTime}</Text>
-                                        </View>
+
                                         <TouchableOpacity
                                             style={styles.btnLessTime}
                                             activeOpacity={0.7}
@@ -166,6 +157,19 @@ export default function BreathingExercises() {
                                         >
                                             <Text style={styles.buttonText}>-</Text>
                                         </TouchableOpacity>
+
+                                        <View>
+                                            <Text style={styles.textTime}>{defaulTime}</Text>
+                                        </View>
+
+                                        <TouchableOpacity
+                                            style={styles.btnMoreTime}
+                                            activeOpacity={0.7}
+                                            onPress={() => newDefaultTime(defaulTime + 1)}
+                                        >
+                                            <Text style={styles.buttonText}>+</Text>
+                                        </TouchableOpacity>
+
                                     </View>
                                 </View>
                             )
@@ -185,43 +189,43 @@ export default function BreathingExercises() {
 
                     {
                         opts.currentEvent >= 0
-                    ?
-                    (
-                    <TouchableOpacity
-                        style={styles.btnStartAndStop}
-                        activeOpacity={0.7}
-                        onPress={() => nextEvent()}
-                    >
-                        <Text style={styles.buttonText}>Avançar</Text>
-                    </TouchableOpacity>
-                    )
-                    :
-                    (
-                    <>
-                        {
-                            activeCountdown ?
-                                (
-                                    <TouchableOpacity
-                                        style={styles.btnStartAndStop}
-                                        activeOpacity={0.7}
-                                        onPress={() => stopCountdown()}
-                                    >
-                                        <Text style={styles.buttonText}>Parar</Text>
-                                    </TouchableOpacity>
-                                )
-                                :
-                                (
-                                    <TouchableOpacity
-                                        style={styles.btnStartAndStop}
-                                        activeOpacity={0.7}
-                                        onPress={() => startCountdown()}
-                                    >
-                                        <Text style={styles.buttonText}>Iniciar</Text>
-                                    </TouchableOpacity>
-                                )
-                        }
-                    </>
-                    )
+                            ?
+                            (
+                                <TouchableOpacity
+                                    style={styles.btnStartAndStop}
+                                    activeOpacity={0.7}
+                                    onPress={() => nextEvent()}
+                                >
+                                    <Text style={styles.buttonText}>Avançar</Text>
+                                </TouchableOpacity>
+                            )
+                            :
+                            (
+                                <>
+                                    {
+                                        activeCountdown ?
+                                            (
+                                                <TouchableOpacity
+                                                    style={styles.btnStartAndStop}
+                                                    activeOpacity={0.7}
+                                                    onPress={() => stopCountdown()}
+                                                >
+                                                    <Text style={styles.buttonText}>Parar</Text>
+                                                </TouchableOpacity>
+                                            )
+                                            :
+                                            (
+                                                <TouchableOpacity
+                                                    style={styles.btnStartAndStop}
+                                                    activeOpacity={0.7}
+                                                    onPress={() => startCountdown()}
+                                                >
+                                                    <Text style={styles.buttonText}>Iniciar</Text>
+                                                </TouchableOpacity>
+                                            )
+                                    }
+                                </>
+                            )
                     }
                 </View>
             </View>
