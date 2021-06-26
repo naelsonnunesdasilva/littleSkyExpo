@@ -68,15 +68,21 @@ export default function Write() {
                             <Feather name="chevron-left" style={styles.buttonIcon} />
                         </Text>
                     </TouchableOpacity>
-                    <TouchableOpacity
-                        style={styles.buttonNewTask}
-                        activeOpacity={0.7}
-                        onPress={() => nextEvent()}
-                    >
-                        <Text style={styles.buttonText}>
-                            AVANÇAR
-                        </Text>
-                    </TouchableOpacity>
+
+                    {
+                        opts.currentEvent >= 0 && (
+                            
+                            <TouchableOpacity
+                                style={styles.buttonNewTask}
+                                activeOpacity={0.7}
+                                onPress={() => nextEvent()}
+                            >
+                                <Text style={styles.buttonText}>
+                                    AVANÇAR
+                                </Text>
+                            </TouchableOpacity>
+                        )
+                    }
                 </View>
             </View>
         </SafeAreaView>

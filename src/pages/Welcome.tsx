@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
     Text,
     SafeAreaView,
@@ -13,6 +13,8 @@ import { Feather } from '@expo/vector-icons';
 import exerciciosDeRespiracaoImg from '../assets/exercicios-de-respiracao-que-relaxam.jpg';
 import fonts from '../styles/fonts';
 import { useNavigation } from '@react-navigation/native';
+import * as Notification from 'expo-notifications';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Welcome() {
 
@@ -21,6 +23,93 @@ export default function Welcome() {
     function handleStart(){
         navigation.navigate('MainMenu')
     }
+
+    async function initialConfig(){
+        const data = await AsyncStorage.getItem(`@littlesky:initialConfig`);
+
+        if(!data){
+            await AsyncStorage.setItem(`@littlesky:initialConfig`, 'iniciado');
+
+            const now = new Date();
+            const times = 1;
+
+            let nextTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 22, 0, 0);
+            let repeat_every = 'daily';
+            
+            if(repeat_every === 'week'){
+                const interval =  Math.trunc(7 / times);
+                nextTime.setDate(now.getDate() * interval);
+            } 
+            else{
+                nextTime.setDate(nextTime.getDate() + 1);
+            }
+
+            let seconds = Math.abs(
+                Math.ceil((now.getTime() - nextTime.getTime()) / 1000)
+            );
+
+            await Notification.scheduleNotificationAsync({
+                content: {
+                    title: 'Heeei 😇',
+                    body: `Quer falar um pouco sobre como está o dia?`,
+                    sound: false,
+                    priority: Notification.AndroidNotificationPriority.HIGH,
+                    data: {
+                        lembrete: 'diário',
+                        page: 'Write',
+                    },
+                },
+                trigger: {
+                    seconds,
+                    repeats: true,
+                }
+            });
+
+            let untilMonday: number;
+
+            if(now.getDay() === 0){
+                untilMonday = 1;
+            }else{
+                untilMonday = now.getDay() - 8;
+            }
+
+            nextTime = new Date(now.getFullYear(), now.getMonth(), now.getDate() + untilMonday, 7, 0, 0);
+            repeat_every = 'week';
+
+            if(repeat_every === 'week'){
+            } 
+            else{
+                nextTime.setDate(nextTime.getDate() + 1);
+            }
+
+            seconds = Math.abs(
+                Math.ceil((now.getTime() - nextTime.getTime()) / 1000)
+            );
+
+            await Notification.scheduleNotificationAsync({
+                content: {
+                    title: 'A semana começou!',
+                    body: `Vamos comerçar mais uma semana com tudo... Pra cima!`,
+                    sound: false,
+                    priority: Notification.AndroidNotificationPriority.HIGH,
+                    data: {
+                        lembrete: 'diário',
+                        page: 'Write',
+                    },
+                },
+                trigger: {
+                    seconds,
+                    repeats: true,
+                }
+            });
+        }else{
+            handleStart();
+        }
+    }
+
+    useEffect(() => {
+        initialConfig();
+    },[])
 
     return (
         <SafeAreaView style={styles.constainer}>

@@ -22,6 +22,13 @@ export default function Distract() {
 
     const navigation = useNavigation();
 
+    async function handleWrite() {
+        navigation.navigate('Write', {opts: {
+            currentEvent: -1,
+            itens: [],
+        }});
+    }
+
     async function handleVideos() {
         navigation.navigate('Videos');
     }
@@ -47,6 +54,13 @@ export default function Distract() {
                             Escolha uma{'\n'}
                             categoria.
                         </Text>
+                    </View>
+
+                    <View style={styles.itemMenu}>
+                        <Button
+                            title='ESCREVER'
+                            onPress={handleWrite}
+                        />
                     </View>
 
                     <View style={styles.itemMenu}>
