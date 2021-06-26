@@ -11,12 +11,22 @@ import { Feather } from '@expo/vector-icons';
 import fonts from '../styles/fonts';
 import LottieView from 'lottie-react-native';
 import breathingAnimation from '../assets/breathing.json';
-import { useNavigation } from '@react-navigation/native';
+import { useRoute, useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ItemSequenceProps } from './CrisisSequence';
+
+interface CrisisSequenceProps {
+    opts: {
+        currentEvent: number,
+        itens: ItemSequenceProps[],
+    }
+}
 
 export default function BreathingExercises() {
-
     const navigation = useNavigation();
+    const route = useRoute();
+    const { opts } = route.params as CrisisSequenceProps;
+
     let countdownTimeOut: any;
     let sentenceTime: any;
 
@@ -75,12 +85,35 @@ export default function BreathingExercises() {
             }, 1000);
         } else if (activeCountdown && !time) {
             stopCountdown();
+
+            if(opts.currentEvent >= 0){
+                nextEvent();
+            }
         }
     }, [activeCountdown, time]);
 
     useEffect(() => {
         startCountdown();
     }, []);
+
+    function nextEvent(){
+        const newOpts = {
+            currentEvent: opts.currentEvent + 1,
+            itens: opts.itens,
+        };
+
+        let page;
+
+        if(newOpts.currentEvent === newOpts.itens.length){
+            page = 'CrisisAlert';
+        }else if(newOpts.itens[newOpts.currentEvent].itemName === 'respiracao'){
+            page = 'BreathingExercises';
+        }else{
+            page = 'Write';
+        }
+
+        navigation.navigate(page, {opts: newOpts});
+    }
 
     return (
         <SafeAreaView style={styles.constainer}>
@@ -149,27 +182,46 @@ export default function BreathingExercises() {
 
                         </Text>
                     </TouchableOpacity>
+
                     {
-                        activeCountdown ?
-                            (
-                                <TouchableOpacity
-                                    style={styles.btnStartAndStop}
-                                    activeOpacity={0.7}
-                                    onPress={() => stopCountdown()}
-                                >
-                                    <Text style={styles.buttonText}>Parar</Text>
-                                </TouchableOpacity>
-                            )
-                            :
-                            (
-                                <TouchableOpacity
-                                    style={styles.btnStartAndStop}
-                                    activeOpacity={0.7}
-                                    onPress={() => startCountdown()}
-                                >
-                                    <Text style={styles.buttonText}>Iniciar</Text>
-                                </TouchableOpacity>
-                            )
+                        opts.currentEvent >= 0
+                    ?
+                    (
+                    <TouchableOpacity
+                        style={styles.btnStartAndStop}
+                        activeOpacity={0.7}
+                        onPress={() => nextEvent()}
+                    >
+                        <Text style={styles.buttonText}>Avançar</Text>
+                    </TouchableOpacity>
+                    )
+                    :
+                    (
+                    <>
+                        {
+                            activeCountdown ?
+                                (
+                                    <TouchableOpacity
+                                        style={styles.btnStartAndStop}
+                                        activeOpacity={0.7}
+                                        onPress={() => stopCountdown()}
+                                    >
+                                        <Text style={styles.buttonText}>Parar</Text>
+                                    </TouchableOpacity>
+                                )
+                                :
+                                (
+                                    <TouchableOpacity
+                                        style={styles.btnStartAndStop}
+                                        activeOpacity={0.7}
+                                        onPress={() => startCountdown()}
+                                    >
+                                        <Text style={styles.buttonText}>Iniciar</Text>
+                                    </TouchableOpacity>
+                                )
+                        }
+                    </>
+                    )
                     }
                 </View>
             </View>

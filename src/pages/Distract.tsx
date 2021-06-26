@@ -1,101 +1,167 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-    Text,
-    SafeAreaView,
-    Image,
-    TouchableOpacity,
     StyleSheet,
-    Dimensions,
-    View
+    SafeAreaView,
+    View,
+    Text,
 } from 'react-native';
 import colors from '../styles/colors';
-import { Feather } from '@expo/vector-icons';
-import exerciciosDeRespiracaoImg from '../assets/exercicios-de-respiracao-que-relaxam.jpg';
 import fonts from '../styles/fonts';
+import Button from '../components/Button';
 import { useNavigation } from '@react-navigation/native';
+const saintsSentences = require('../services/saintsSentences.json');
+
+export interface SaintsSentencesProps {
+    sentence: string;
+    author: string,
+}
 
 export default function Distract() {
+    const [sentence, setSentece] = useState<SaintsSentencesProps>({ sentence: '', author: '' });
 
     const navigation = useNavigation();
 
-    function handleStart(){
-        navigation.navigate('MainMenu')
+    async function handleCrisisAlert() {
+        navigation.navigate('CrisisAlert');
     }
 
+    async function handleListsOfTasks() {
+        navigation.navigate('ListsOfTasks');
+    }
+
+    async function handleBreathingExercises() {
+        navigation.navigate('BreathingExercises', {opts: {
+            currentEvent: -1,
+            itens: [],
+        }});
+    }
+
+    async function handleDistract() {
+        navigation.navigate('Distract');
+    }
+
+    async function randomSentence() {
+        const index: number = Math.floor(Math.random() * saintsSentences.sentences.length);
+
+        setSentece(saintsSentences.sentences[index]);
+    }
+
+    useEffect(() => {
+        randomSentence();
+    }, []);
+
     return (
-        <SafeAreaView style={styles.constainer}>
-            <View style={styles.wrapper} >
-                <Text style={styles.title}>
-                    Gerencie {'\n'}
-                    sua ansiedade {'\n'}
-                    de forma fácil
-                </Text>
+        <SafeAreaView style={styles.container}>
+            <View style={styles.content}>
+                <View style={styles.form}>
+                    <View style={styles.header}>
+                        <Text style={styles.emoji}>
+                        🎲
+                        </Text>
 
-                <Image
-                    source={exerciciosDeRespiracaoImg} style={styles.image}
-                    resizeMode={'contain'}
-                />
+                        <Text style={styles.title}>
+                            Escolha uma{'\n'}
+                            categoria.
+                        </Text>
+                    </View>
 
-                <Text style={styles.subtitle}>
-                    Sempre que precisar,{'\n'}
-                    nós cuidaremos de você!
-                </Text>
+                    <View style={styles.itemMenu}>
+                        <Button
+                            title='VÍDEOS'
+                            onPress={handleCrisisAlert}
+                        />
+                    </View>
 
-                <TouchableOpacity
-                    style={styles.button}
-                    activeOpacity={0.7}
-                    onPress={handleStart}
-                >
-                    <Text>
-                        <Feather name="chevron-right" style={styles.buttonIcon} />
-                    </Text>
-                </TouchableOpacity>
+                    <View style={styles.itemMenu}>
+                        <Button
+                            title='LER'
+                            onPress={handleListsOfTasks}
+                        />
+                    </View>
+
+                    <View style={styles.itemMenu}>
+                        <Button
+                            title='EXERCÍCIOS DE RESPIRAÇÃO'
+                            onPress={handleBreathingExercises}
+                        />
+                    </View>
+
+                    <View style={styles.itemMenu}>
+                        <Button
+                            title='DISTRAIR'
+                            onPress={handleDistract}
+                        />
+                    </View>
                 </View>
+                <View style={styles.sentenceContent}>
+                    <Text style={styles.sentence}>"{sentence.sentence}" - {sentence.author}</Text>
+                </View>
+            </View>
+
+
+
         </SafeAreaView>
     )
 }
 
 const styles = StyleSheet.create({
-    constainer: {
+    container: {
         flex: 1,
-    },
-    wrapper:{
-        flex: 1,
+        width: '100%',
         alignItems: 'center',
         justifyContent: 'space-around',
-        paddingHorizontal: 20,
+    },
+    content: {
+        flex: 1,
+        width: '100%',
+    },
+    form: {
+        flex: 1,
+        justifyContent: 'center',
+        paddingHorizontal: 54,
+        alignItems: 'center',
+    },
+    header: {
+        alignItems: 'center',
+    },
+    emoji: {
+        fontSize: 44
+    },
+    input: {
+        borderBottomWidth: 1,
+        borderColor: colors.gray,
+        color: colors.heading,
+        width: '100%',
+        fontSize: 18,
+        marginTop: 50,
+        padding: 10,
+        textAlign: 'center',
     },
     title: {
-        fontSize: 28,
-        fontWeight: 'bold',
+        fontSize: 24,
         textAlign: 'center',
-        color: colors.sky_blue_dark,
-        marginTop: 38,
+        color: colors.heading,
         fontFamily: fonts.heading,
-        lineHeight: 34,
+        lineHeight: 32,
+        marginTop: 20,
     },
-    subtitle: {
+    itemMenu: {
+        width: '100%',
+        marginTop: 40,
+        paddingHorizontal: 15,
+    },
+    sentenceContent: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-around',
+    },
+    sentence: {
+        width: '90%',
+        marginTop: -20,
+        marginBottom: 30,
         textAlign: 'center',
-        fontSize: 18,
-        paddingHorizontal: 20,
+        fontSize: 19,
         color: colors.heading,
         fontFamily: fonts.text,
-    },
-    button: {
-        backgroundColor: colors.sky_blue,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: 16,
-        marginTop: 10,
-        marginBottom: 10,
-        height: 56,
-        width: 56,
-    },
-    buttonIcon: {
-        fontSize: 32,
-        color: colors.white,
-    },
-    image: {
-        height: Dimensions.get('window').width *0.7,
     }
 })

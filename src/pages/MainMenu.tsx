@@ -30,7 +30,10 @@ export default function MainMenu() {
     }
 
     async function handleBreathingExercises() {
-        navigation.navigate('BreathingExercises');
+        navigation.navigate('BreathingExercises', {opts: {
+            currentEvent: -1,
+            itens: [],
+        }});
     }
 
     async function handleDistract() {

@@ -13,40 +13,41 @@ import colors from '../styles/colors';
 import { Feather } from '@expo/vector-icons';
 import { RectButton, TouchableHighlight } from 'react-native-gesture-handler';
 import fonts from '../styles/fonts';
-import { useNavigation } from '@react-navigation/native';
+import { useRoute, useNavigation } from '@react-navigation/native';
 import Button from '../components/Button';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Picker } from '@react-native-picker/picker';
 
-export interface ListsOfTasksProps {
+export interface ItemSequenceProps {
+    sequenceId: number;
     id: number;
-    name: string;
-    dateTimeNotification: Date | null,
+    itemName: string;
 }
 
 export default function CrisisSequence() {
     const navigation = useNavigation();
 
-    const [name, setName] = useState<string>();
-    const [listsOfTasks, setListsOfTasks] = useState<ListsOfTasksProps[]>([]);
+    const [itemNameSelected, setItemNameSelected] = useState<string>('');
+    const [itens, setItens] = useState<ItemSequenceProps[]>([]);
     const [showModal, setShowModal] = useState<boolean>(false);
-    const [selectedLanguage, setSelectedLanguage] = useState('java');
+    const [selectedTask, setSelectedTask] = useState<any>({});
 
-    async function fetchTasks() {
-        const oldlistOfTasks: ListsOfTasksProps[] = await loadTasks();
+    const route = useRoute();
+    const { sequenceId } = route.params as ItemSequenceProps;
 
-        setListsOfTasks(oldlistOfTasks);
+    async function fetchItens() {
+        const oldTasks: ItemSequenceProps[] = await loadItens();
+        setItens(oldTasks);
     }
 
     useEffect(() => {
-        fetchTasks();
+        fetchItens();
     }, []);
 
-    async function loadTasks(): Promise<ListsOfTasksProps[]> {
+    async function loadItens(): Promise<ItemSequenceProps[]> {
         try {
-            const data = await AsyncStorage.getItem('@littlesky:listsOftasks');
-            return data ? (JSON.parse(data) as ListsOfTasksProps[]) : [];
-
+            const data = await AsyncStorage.getItem(`@littlesky:sequence-${sequenceId}`);
+            return data ? (JSON.parse(data) as ItemSequenceProps[]) : [];
 
         } catch (error) {
             throw new Error(error);
@@ -57,42 +58,74 @@ export default function CrisisSequence() {
         navigation.goBack();
     }
 
-    async function handleNewTask() {
-        if (!name) {
-            return Alert.alert('Adicione um nome a sua lista de tarefas.')
-        }
-
+    async function handleNewItem() {
         try {
-            const id: number = listsOfTasks.length ? Number(listsOfTasks[listsOfTasks.length - 1]['id']) + 1 : 1;
-            let newListOfTasks = listsOfTasks;
-            newListOfTasks?.push({
-                id,
-                name,
-                dateTimeNotification: null,
-            });
+            let newTasks = itens;
+            if(!selectedTask.id){
+                const id: number = itens.length ? Number(itens[itens.length - 1]['id']) + 1 : 1;
+                newTasks?.push({
+                    id,
+                    itemName: itemNameSelected,
+                    sequenceId: sequenceId,
+                });
+            } else {
+                newTasks = newTasks?.map(task => {
+                    if(task.id === selectedTask.id){
+                        task = {
+                            id: selectedTask.id,
+                            itemName: itemNameSelected,
+                            sequenceId: sequenceId,
+                        };
+                    }
 
-            await AsyncStorage.setItem('@littlesky:listsOftasks', JSON.stringify(newListOfTasks));
-            setListsOfTasks(newListOfTasks);
+                    return task;
+                });
+            }
+
+            await AsyncStorage.setItem(`@littlesky:sequence-${sequenceId}`, JSON.stringify(newTasks));
+            setItens(newTasks);
             setShowModal(false);
-            setName('');
+            setItemNameSelected('');
+            setSelectedTask({} as any)
         } catch (error) {
-            Alert.alert('Não foi possivel salvar sua lista')
+            Alert.alert('Não foi possivel salvar sua sequência', error);
+            console.log(error);
         }
     }
 
     async function handleRemove(taskId: number) {
-        const newListOfTasks = listsOfTasks.filter(listOfTasks => listOfTasks.id != taskId);
+        const newTasks = itens.filter(task => task.id != taskId);
 
-        setListsOfTasks(newListOfTasks);
-        await AsyncStorage.setItem('@littlesky:listsOftasks', JSON.stringify(newListOfTasks));
+        setItens(newTasks);
+        await AsyncStorage.setItem(`@littlesky:sequence-${sequenceId}`, JSON.stringify(newTasks));
     }
 
-    function handleInputChange(value: string) {
-        setName(value);
+    function editItem(item: ItemSequenceProps) {
+        setItemNameSelected(item.itemName);
+        setSelectedTask(item);
+        setShowModal(true);
     }
 
-    function handleTasks(id: number) {
-        navigation.navigate('Tasks', { listId: id });
+    function newItem(){
+        setShowModal(true);
+        setItemNameSelected('respiracao');
+    }
+
+    function startSequence(){
+        const opts = {
+            currentEvent: 0,
+            itens
+        };
+
+        let page;
+
+        if(itens[0].itemName === 'respiracao'){
+            page = 'BreathingExercises';
+        }else{
+            page = 'Write';
+        }
+
+        navigation.navigate(page, {opts});
     }
 
     return (
@@ -105,19 +138,19 @@ export default function CrisisSequence() {
                 />
                 <View style={styles.modalContainer}>
                     <View style={styles.modalBox}>
-                        <Text style={styles.modalTxt}>Nome da Lista</Text>
+                        <Text style={styles.modalTxt}>Escolha o item:</Text>
                         <Picker
                             style={styles.selectInput}
-                            selectedValue={selectedLanguage}
+                            selectedValue={itemNameSelected}
                             onValueChange={(itemValue, itemIndex) =>
-                                setSelectedLanguage(itemValue)
+                                setItemNameSelected(itemValue)
                             }>
                             <Picker.Item label="Exercicios de respiração" value="respiracao" />
                             <Picker.Item label="Escrever" value="escrever" />
                         </Picker>
                         <Button
                             title='ADICIONAR'
-                            onPress={handleNewTask}
+                            onPress={handleNewItem}
                         />
                     </View>
                 </View>
@@ -125,23 +158,27 @@ export default function CrisisSequence() {
             <View style={styles.wrapper} >
                 <View style={styles.contentListTaks}>
                     <FlatList
-                        data={listsOfTasks}
+                        data={itens}
                         keyExtractor={(item) => `${item.id}`}
                         renderItem={({ item }) => (
-                            <View style={styles.itemListTasks} >
-                                <TouchableHighlight
-                                    style={styles.btnTask}
-                                    onPress={() => handleTasks(item.id)}
-                                    underlayColor='#ddd'
-                                >
-                                    <Text style={styles.textListTasks}>- {item.name}</Text>
-                                </TouchableHighlight>
+                            <View style={styles.itemListItens} >
+                                <View style={styles.itemListItenssLeft} >
+                                    <TouchableHighlight
+                                        style={styles.btnTask}
+                                        onPress={() => editItem(item)}
+                                        underlayColor='#ddd'
+                                    >
+                                        <Text style={styles.textListTasks}>{item.itemName}</Text>
+                                    </TouchableHighlight>
+
+                                </View>
                                 <RectButton
                                     style={styles.buttonRemove}
                                     onPress={() => handleRemove(item.id)}
                                 >
                                     <Feather name="trash" size={32} color={colors.red} />
                                 </RectButton>
+
                             </View>
                         )}
                         showsVerticalScrollIndicator={false}
@@ -161,18 +198,18 @@ export default function CrisisSequence() {
                         </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                        style={styles.buttonNewList}
+                        style={styles.buttonNewTask}
                         activeOpacity={0.7}
-                        onPress={() => setShowModal(true)}
+                        onPress={() => newItem()}
                     >
                         <Text style={styles.buttonText}>
                             NOVO ITEM
                         </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                        style={styles.buttonNewList}
+                        style={styles.buttonNewTask}
                         activeOpacity={0.7}
-                        onPress={() => setShowModal(true)}
+                        onPress={() => startSequence()}
                     >
                         <Text style={styles.buttonText}>
                             INICIAR
@@ -211,38 +248,6 @@ const styles = StyleSheet.create({
         color: colors.heading,
         fontFamily: fonts.text,
     },
-
-    contentListTaks: {
-        width: '100%',
-        padding: 20,
-        height: '80%',
-        marginTop: 5,
-    },
-    itemListTasks: {
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        borderBottomColor: colors.sky_blue,
-        borderBottomWidth: 2,
-        paddingVertical: 5,
-    },
-    btnTask: {
-        width: 280,
-        display: 'flex',
-        paddingBottom: 10,
-    },
-    textListTasks: {
-        fontSize: 16,
-        alignContent: 'flex-start',
-        paddingTop: 20,
-        color: colors.heading,
-        fontFamily: fonts.text,
-        letterSpacing: 1,
-    },
-    buttonRemove: {
-        paddingTop: 15,
-        alignContent: 'flex-end',
-    },
     footerBtns: {
         width: '100%',
         display: 'flex',
@@ -264,7 +269,7 @@ const styles = StyleSheet.create({
         fontSize: 32,
         color: colors.white,
     },
-    buttonNewList: {
+    buttonNewTask: {
         backgroundColor: colors.sky_blue,
         color: colors.white,
         justifyContent: 'center',
@@ -278,6 +283,44 @@ const styles = StyleSheet.create({
     buttonText: {
         fontSize: 20,
         color: colors.white,
+    },
+    contentListTaks: {
+        width: '100%',
+        padding: 20,
+        height: '80%',
+        marginTop: 5,
+    },
+    itemListItens: {
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        borderBottomColor: colors.sky_blue,
+        borderBottomWidth: 2,
+        paddingVertical: 5,
+    },
+    itemListItenssLeft:{
+        display: 'flex',
+        flexDirection: 'row',
+    },
+    completed:{
+        fontSize: 5,
+    },
+    btnTask: {
+        width: 200,
+        display: 'flex',
+        paddingBottom: 10,
+        marginLeft: 5,
+    },
+    textListTasks: {
+        fontSize: 16,
+        alignContent: 'flex-start',
+        paddingTop: 5,
+        color: colors.heading,
+        fontFamily: fonts.text,
+        letterSpacing: 0.7,
+    },
+    buttonRemove: {
+        alignContent: 'flex-end',
     },
     modal: {
         position: 'absolute',

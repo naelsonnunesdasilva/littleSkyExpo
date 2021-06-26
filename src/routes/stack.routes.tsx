@@ -14,7 +14,7 @@ import ListsOfTasks from '../pages/ListsOfTasks';
 import Tasks from '../pages/Tasks';
 import BreathingExercises from '../pages/BreathingExercises';
 import Distract from '../pages/Distract';
-import { MyPlants } from '../pages/MyPlants';
+import Write from '../pages/Write';
 
 const stackRoutes = createStackNavigator();
 
@@ -45,6 +45,11 @@ const AppRoutes: React.FC = () => (
         <stackRoutes.Screen
             name="CrisisSequence"
             component={CrisisSequence}
+        />
+
+        <stackRoutes.Screen
+            name="Write"
+            component={Write}
         />
 
         <stackRoutes.Screen

@@ -90,7 +90,7 @@ export default function CrisisAlert() {
     }
 
     function handleSequences(id: number){
-        navigation.navigate('CrisisSequence', {seuqenceId: id});
+        navigation.navigate('CrisisSequence', {sequenceId: id});
     }
 
     return (
